@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Local Laravel dev server, reached over Tailscale during development. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">100.101.150.38</domain>
+    </domain-config>
+
+    <!-- Emulator alias for the host loopback, used when testing with -PapiBaseUrl=http://10.0.2.2:8001/... -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

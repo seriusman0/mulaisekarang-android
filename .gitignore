@@ -1,0 +1,17 @@
+*.iml
+.gradle/
+/local.properties
+.idea/
+.DS_Store
+/build
+**/build/
+/captures
+.externalNativeBuild
+.cxx
+graphify-out/
+
+# Release signing (never commit — see keystore.properties / README.md)
+keystore.properties
+*.jks
+*.keystore
+local.properties
