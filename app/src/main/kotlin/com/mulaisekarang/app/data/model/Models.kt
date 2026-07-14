@@ -64,11 +64,35 @@ data class Lesson(
 )
 
 @Serializable
+data class QuizSummary(
+    val id: Int,
+    val title: String,
+    val order: Int = 0,
+    @SerialName("questions_count") val questionsCount: Int = 0,
+    @SerialName("time_limit") val timeLimit: Int? = null,
+    @SerialName("passing_grade") val passingGrade: Int? = null,
+    @SerialName("max_attempts") val maxAttempts: Int? = null,
+    @SerialName("my_best_score") val myBestScore: Double? = null,
+)
+
+@Serializable
+data class AssignmentSummary(
+    val id: Int,
+    val title: String,
+    val order: Int = 0,
+    @SerialName("total_points") val totalPoints: Int = 0,
+    @SerialName("due_at") val dueAt: String? = null,
+    @SerialName("my_submission_status") val mySubmissionStatus: String? = null,
+)
+
+@Serializable
 data class Topic(
     val id: Int,
     val title: String,
     val order: Int = 0,
     val lessons: List<Lesson> = emptyList(),
+    val quizzes: List<QuizSummary> = emptyList(),
+    val assignments: List<AssignmentSummary> = emptyList(),
 )
 
 @Serializable
@@ -131,6 +155,102 @@ data class CategoriesResponse(
 )
 
 @Serializable
+data class InstructorDetail(
+    val id: Int,
+    @SerialName("display_name") val displayName: String,
+    val username: String? = null,
+    @SerialName("profile_photo_url") val profilePhotoUrl: String? = null,
+    @SerialName("job_title") val jobTitle: String? = null,
+    @SerialName("is_verified_instructor") val isVerifiedInstructor: Boolean = false,
+    val bio: String? = null,
+    val rating: Double? = null,
+    @SerialName("student_count") val studentCount: Int? = null,
+    @SerialName("course_count") val courseCount: Int = 0,
+)
+
+@Serializable
+data class InstructorDetailResponse(
+    val data: InstructorDetail,
+    val courses: List<Course> = emptyList(),
+)
+
+@Serializable
+data class QuizQuestion(
+    val id: Int,
+    val question: String,
+    val type: String,
+    val options: List<String> = emptyList(),
+    val order: Int = 0,
+)
+
+@Serializable
+data class QuizDetail(
+    val id: Int,
+    val title: String,
+    @SerialName("time_limit") val timeLimit: Int? = null,
+    @SerialName("passing_grade") val passingGrade: Int? = null,
+    @SerialName("max_attempts") val maxAttempts: Int? = null,
+    @SerialName("attempts_used") val attemptsUsed: Int = 0,
+    val questions: List<QuizQuestion> = emptyList(),
+)
+
+@Serializable
+data class QuizDetailResponse(val data: QuizDetail)
+
+@Serializable
+data class SubmitQuizAnswersRequest(val answers: Map<String, String>)
+
+@Serializable
+data class QuizResult(
+    val score: Double,
+    val passed: Boolean,
+    @SerialName("correct_count") val correctCount: Int,
+    @SerialName("total_count") val totalCount: Int,
+)
+
+@Serializable
+data class QuizResultResponse(val data: QuizResult)
+
+@Serializable
+data class AssignmentSubmissionInfo(
+    val id: Int,
+    @SerialName("file_url") val fileUrl: String? = null,
+    @SerialName("repository_url") val repositoryUrl: String? = null,
+    val status: String,
+    val grade: Int? = null,
+    val feedback: String? = null,
+    @SerialName("submitted_at") val submittedAt: String? = null,
+)
+
+@Serializable
+data class AssignmentDetail(
+    val id: Int,
+    val title: String,
+    val instructions: String,
+    @SerialName("total_points") val totalPoints: Int = 0,
+    @SerialName("due_at") val dueAt: String? = null,
+    @SerialName("allow_resubmission") val allowResubmission: Boolean = true,
+    @SerialName("my_submission") val mySubmission: AssignmentSubmissionInfo? = null,
+)
+
+@Serializable
+data class AssignmentDetailResponse(val data: AssignmentDetail)
+
+@Serializable
+data class AssignmentSubmissionResponse(val data: AssignmentSubmissionInfo)
+
+@Serializable
+data class DashboardSummary(
+    @SerialName("total_learning_hours") val totalLearningHours: Double = 0.0,
+    @SerialName("enrolled_courses_count") val enrolledCoursesCount: Int = 0,
+)
+
+@Serializable
+data class DashboardSummaryResponse(
+    val data: DashboardSummary,
+)
+
+@Serializable
 data class User(
     val id: Int,
     val name: String,
@@ -173,6 +293,19 @@ data class LoginRequest(
 )
 
 @Serializable
+data class ForgotPasswordRequest(
+    val email: String,
+)
+
+@Serializable
+data class ResetPasswordRequest(
+    val email: String,
+    val token: String,
+    val password: String,
+    @SerialName("password_confirmation") val passwordConfirmation: String,
+)
+
+@Serializable
 data class GoogleLoginRequest(
     @SerialName("id_token") val idToken: String,
 )
@@ -206,7 +339,10 @@ data class EnrollmentsResponse(
 @Serializable
 data class Conversation(
     val id: Int,
-    @SerialName("other_party") val otherParty: Mentor,
+    val type: String? = "mentor",
+    val title: String? = null,
+    @SerialName("other_party") val otherParty: Mentor? = null,
+    val participants: List<Mentor>? = null,
     @SerialName("last_message_at") val lastMessageAt: String? = null,
     @SerialName("unread_count") val unreadCount: Int = 0,
 )
@@ -226,6 +362,7 @@ data class ChatMessage(
     val id: Int,
     @SerialName("conversation_id") val conversationId: Int,
     @SerialName("sender_id") val senderId: Int,
+    @SerialName("sender_name") val senderName: String? = null,
     @SerialName("is_mine") val isMine: Boolean,
     val body: String? = null,
     @SerialName("created_at") val createdAt: String,
@@ -238,12 +375,23 @@ data class MessagesResponse(
 
 @Serializable
 data class SendMessageResponse(
-    val data: ChatMessage,
+    val data: List<ChatMessage>,
 )
 
 @Serializable
 data class StartConversationRequest(
     val username: String,
+)
+
+@Serializable
+data class CreateGroupRequest(
+    val title: String,
+    @SerialName("participant_usernames") val participantUsernames: List<String>,
+)
+
+@Serializable
+data class EligibleContactsResponse(
+    val data: List<Mentor>,
 )
 
 @Serializable

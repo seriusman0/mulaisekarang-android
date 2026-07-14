@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.ChatRepository
 import com.mulaisekarang.app.data.model.ChatMessage
+import com.mulaisekarang.app.data.model.Conversation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,8 +30,18 @@ class ChatConversationViewModel(
     private val _uiState = MutableStateFlow<ChatConversationUiState>(ChatConversationUiState.Loading)
     val uiState: StateFlow<ChatConversationUiState> = _uiState.asStateFlow()
 
+    private val _conversation = MutableStateFlow<Conversation?>(null)
+    val conversation: StateFlow<Conversation?> = _conversation.asStateFlow()
+
     private var pollingJob: Job? = null
     private var isSending = false
+
+    init {
+        viewModelScope.launch {
+            runCatching { repository.conversations() }
+                .onSuccess { list -> _conversation.value = list.find { it.id == conversationId } }
+        }
+    }
 
     fun startPolling() {
         if (pollingJob?.isActive == true) return

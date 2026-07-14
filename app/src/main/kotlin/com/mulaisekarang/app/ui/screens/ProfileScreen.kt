@@ -1,346 +1,233 @@
 package com.mulaisekarang.app.ui.screens
 
-import android.content.Context
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.mulaisekarang.app.data.model.User
-import com.mulaisekarang.app.ui.components.GlassCard
-import com.mulaisekarang.app.ui.theme.Blue
-import com.mulaisekarang.app.ui.theme.BlueLight
 import com.mulaisekarang.app.viewmodel.AuthUiState
 import com.mulaisekarang.app.viewmodel.AuthViewModel
-import com.mulaisekarang.app.viewmodel.ProfileUpdateEvent
-import java.io.File
-import java.io.FileOutputStream
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     onLoggedOut: () -> Unit,
+    onNavigateToMyCourses: () -> Unit,
+    onEditProfile: () -> Unit,
 ) {
     val uiState by authViewModel.uiState.collectAsState()
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    var editing by remember { mutableStateOf(false) }
-    var isSaving by remember { mutableStateOf(false) }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var bio by remember { mutableStateOf("") }
-    var pickedPhotoUri by remember { mutableStateOf<Uri?>(null) }
-
-    val photoPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri -> if (uri != null) pickedPhotoUri = uri }
 
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.LoggedOut) onLoggedOut()
     }
 
-    LaunchedEffect(Unit) {
-        authViewModel.profileUpdateEvent.collect { event ->
-            when (event) {
-                is ProfileUpdateEvent.Loading -> isSaving = true
-                is ProfileUpdateEvent.Success -> {
-                    isSaving = false
-                    editing = false
-                    pickedPhotoUri = null
-                    coroutineScope.launch { snackbarHostState.showSnackbar("Profil berhasil diperbarui!") }
-                }
-                is ProfileUpdateEvent.Error -> {
-                    isSaving = false
-                    coroutineScope.launch { snackbarHostState.showSnackbar(event.message) }
-                }
-            }
-        }
-    }
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+        val user = (uiState as? AuthUiState.LoggedIn)?.user
 
-    fun startEditing(user: User) {
-        firstName = user.firstName ?: ""
-        lastName = user.lastName ?: ""
-        username = user.username ?: ""
-        bio = user.bio ?: ""
-        pickedPhotoUri = null
-        editing = true
-    }
-
-    Scaffold(
-        containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(listOf(Blue, BlueLight))),
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
         ) {
-            val user = (uiState as? AuthUiState.LoggedIn)?.user
-
-            Column(
+            Text(
+                "Profil",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 16.dp, bottom = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    "Akun",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                )
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+            )
 
-                if (user != null) {
-                    Box(contentAlignment = Alignment.BottomEnd) {
-                        val avatarModel = pickedPhotoUri ?: user.profilePhotoUrl
-                        val avatarClickable = if (editing) {
-                            Modifier.clickable { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
-                        } else {
-                            Modifier
-                        }
-                        if (avatarModel != null) {
-                            AsyncImage(
-                                model = avatarModel,
-                                contentDescription = user.displayName,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(112.dp)
-                                    .clip(CircleShape)
-                                    .then(avatarClickable),
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(112.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.25f))
-                                    .then(avatarClickable),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    Icons.Filled.Person,
-                                    contentDescription = user.displayName,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(56.dp),
-                                )
-                            }
-                        }
-                        if (editing) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primary)
-                                    .clickable { photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    Icons.Filled.PhotoCamera,
-                                    contentDescription = "Ubah foto",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
-                        }
-                    }
-
-                    GlassCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 20.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+            if (user != null) {
+                Surface(
+                    shape = RoundedCornerShape(32.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Box {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            Text(
-                                if (editing) "Edit Profil" else user.displayName,
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            if (!editing) {
-                                IconButton(onClick = { startEditing(user) }) {
-                                    Icon(Icons.Filled.Edit, contentDescription = "Edit Profil")
-                                }
+                            if (user.profilePhotoUrl != null) {
+                                AsyncImage(
+                                    model = user.profilePhotoUrl,
+                                    contentDescription = user.displayName,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(104.dp)
+                                        .clip(CircleShape),
+                                )
                             } else {
-                                IconButton(onClick = { editing = false }) {
-                                    Icon(Icons.Filled.Close, contentDescription = "Batal")
+                                Box(
+                                    modifier = Modifier
+                                        .size(104.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Person,
+                                        contentDescription = user.displayName,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(48.dp),
+                                    )
                                 }
                             }
-                        }
 
-                        if (!editing) {
                             Text(
-                                "@${user.username ?: "-"}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 4.dp),
+                                user.displayName,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(top = 16.dp),
                             )
                             Text(
                                 user.email,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(top = 8.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                            Text(
+                                user.role.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .padding(top = 12.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
                             )
                             if (!user.bio.isNullOrBlank()) {
                                 Text(
                                     user.bio,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(top = 8.dp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 12.dp),
                                 )
                             }
-                            Text(
-                                user.role,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                        } else {
-                            OutlinedTextField(
-                                value = firstName,
-                                onValueChange = { firstName = it },
-                                label = { Text("Nama Depan") },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 12.dp),
-                            )
-                            OutlinedTextField(
-                                value = lastName,
-                                onValueChange = { lastName = it },
-                                label = { Text("Nama Belakang") },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 12.dp),
-                            )
-                            OutlinedTextField(
-                                value = username,
-                                onValueChange = { username = it },
-                                label = { Text("Username") },
-                                singleLine = true,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 12.dp),
-                            )
-                            OutlinedTextField(
-                                value = bio,
-                                onValueChange = { bio = it },
-                                label = { Text("Bio") },
-                                minLines = 2,
-                                maxLines = 4,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 12.dp),
-                            )
+                        }
 
-                            Button(
-                                onClick = {
-                                    val photoFile = pickedPhotoUri?.let { uriToFile(context, it) }
-                                    authViewModel.updateProfile(
-                                        firstName = firstName,
-                                        lastName = lastName.ifBlank { null },
-                                        username = username.ifBlank { null },
-                                        bio = bio.ifBlank { null },
-                                        photoFile = photoFile,
-                                    )
-                                },
-                                enabled = !isSaving && firstName.isNotBlank(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp),
-                            ) {
-                                if (isSaving) {
-                                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                                } else {
-                                    Text("Simpan")
-                                }
-                            }
+                        IconButton(
+                            onClick = onEditProfile,
+                            modifier = Modifier.align(Alignment.TopEnd),
+                        ) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Edit Profil")
                         }
                     }
                 }
 
-                GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp),
+                Text(
+                    "AKTIVITAS SAYA",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 24.dp, bottom = 12.dp, start = 4.dp),
+                )
+
+                Surface(
+                    onClick = onNavigateToMyCourses,
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    OutlinedButton(
-                        onClick = { authViewModel.logout() },
-                        modifier = Modifier.fillMaxWidth(),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("Keluar")
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Filled.School,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 16.dp),
+                        ) {
+                            Text("Kursus Saya", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Lanjutkan pembelajaran Anda",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Icon(
+                            Icons.Filled.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outlineVariant,
+                        )
                     }
                 }
+            }
+
+            OutlinedButton(
+                onClick = { authViewModel.logout() },
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp),
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text("  Keluar", fontWeight = FontWeight.Bold)
             }
         }
     }
 }
-
-private fun uriToFile(context: Context, uri: Uri): File? = runCatching {
-    val file = File(context.cacheDir, "profile_photo_${System.currentTimeMillis()}.jpg")
-    context.contentResolver.openInputStream(uri)?.use { input ->
-        FileOutputStream(file).use { output -> input.copyTo(output) }
-    }
-    file
-}.getOrNull()

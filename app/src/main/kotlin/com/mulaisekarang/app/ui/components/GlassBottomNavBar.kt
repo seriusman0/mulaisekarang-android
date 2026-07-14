@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 enum class BottomNavTab(val route: String, val label: String, val icon: ImageVector) {
-    BERANDA("marketplace", "Beranda", Icons.Filled.Home),
+    BERANDA("home", "Beranda", Icons.Filled.Home),
     KURSUS_SAYA("my-courses", "Kursus Saya", Icons.Filled.School),
     CHAT("chat", "Chat", Icons.AutoMirrored.Filled.Chat),
     AKUN("profile", "Akun", Icons.Filled.Person),

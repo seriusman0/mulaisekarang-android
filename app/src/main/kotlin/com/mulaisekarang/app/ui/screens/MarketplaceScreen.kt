@@ -1,5 +1,6 @@
 package com.mulaisekarang.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,24 +8,30 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.ui.components.CourseCard
 import com.mulaisekarang.app.ui.components.EmptyState
 import com.mulaisekarang.app.ui.components.ErrorState
@@ -39,39 +46,68 @@ fun MarketplaceScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Marketplace") })
-        },
-    ) { padding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(modifier = Modifier.padding(padding)) {
+            Text(
+                "Marketplace Kursus",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
+            )
+
             OutlinedTextField(
                 value = uiState.search,
                 onValueChange = {
                     viewModel.onSearchChange(it)
                     viewModel.loadCourses()
                 },
-                label = { Text("Cari course...") },
+                placeholder = { Text("Cari kursus atau keahlian baru...") },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
+                shape = RoundedCornerShape(20.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 20.dp),
             )
 
-            if (uiState.categories.isNotEmpty()) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(uiState.categories, key = { it.slug }) { category ->
-                        FilterChip(
-                            selected = uiState.selectedCategorySlug == category.slug,
-                            onClick = { viewModel.onCategorySelect(category.slug) },
-                            label = { Text(category.name) },
-                        )
-                    }
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item {
+                    CategoryChip(
+                        label = "Semua",
+                        selected = uiState.selectedCategorySlug == null,
+                        onClick = { viewModel.onCategorySelect(null) },
+                    )
+                }
+                items(uiState.categories, key = { it.slug }) { category: Category ->
+                    CategoryChip(
+                        label = category.name,
+                        selected = uiState.selectedCategorySlug == category.slug,
+                        onClick = { viewModel.onCategorySelect(category.slug) },
+                    )
                 }
             }
+
+            val sectionTitle = if (uiState.search.isNotBlank() || uiState.selectedCategorySlug != null) {
+                "Hasil Pencarian"
+            } else {
+                "Semua Kursus"
+            }
+            Text(
+                "$sectionTitle (${uiState.courses.size})",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
 
             PullToRefreshBox(
                 isRefreshing = uiState.isLoading,
@@ -88,11 +124,9 @@ fun MarketplaceScreen(
                         message = "Tidak ada course yang ditemukan. Coba kata kunci atau kategori lain.",
                     )
 
-                    else -> LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    else -> LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         items(uiState.courses, key = { it.id }) { course ->
@@ -100,22 +134,28 @@ fun MarketplaceScreen(
                                 title = course.title,
                                 coverImageUrl = course.coverImageUrl,
                                 mentorName = course.mentor?.displayName,
+                                categoryLabel = course.category?.name,
+                                rating = course.reviewsAvgRating,
                                 onClick = { onCourseClick(course.id) },
                             ) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 4.dp),
+                                        .padding(top = 8.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                 ) {
                                     Text(
                                         if (course.currentPrice <= 0.0) "Gratis" else IdrCurrencyFormat.format(course.currentPrice),
                                         style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.ExtraBold,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
-                                    course.reviewsAvgRating?.let {
-                                        Text("★ $it", style = MaterialTheme.typography.labelMedium)
-                                    }
+                                    Icon(
+                                        Icons.Filled.ArrowForward,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.outlineVariant,
+                                        modifier = Modifier.padding(2.dp),
+                                    )
                                 }
                             }
                         }
@@ -123,5 +163,27 @@ fun MarketplaceScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+    val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = containerColor,
+        border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Black,
+            fontSize = 11.sp,
+            color = contentColor,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+        )
     }
 }

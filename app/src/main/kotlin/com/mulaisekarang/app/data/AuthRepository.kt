@@ -1,8 +1,10 @@
 package com.mulaisekarang.app.data
 
+import com.mulaisekarang.app.data.model.ForgotPasswordRequest
 import com.mulaisekarang.app.data.model.GoogleLoginRequest
 import com.mulaisekarang.app.data.model.LoginRequest
 import com.mulaisekarang.app.data.model.RegisterRequest
+import com.mulaisekarang.app.data.model.ResetPasswordRequest
 import com.mulaisekarang.app.data.model.User
 import com.mulaisekarang.app.data.network.ApiService
 import okhttp3.MediaType.Companion.toMediaType
@@ -52,6 +54,11 @@ class AuthRepository(
     }
 
     suspend fun me(): User = api.me().user
+
+    suspend fun forgotPassword(email: String): String = api.forgotPassword(ForgotPasswordRequest(email)).message
+
+    suspend fun resetPassword(email: String, token: String, password: String): String =
+        api.resetPassword(ResetPasswordRequest(email, token, password, password)).message
 
     suspend fun updateProfile(
         firstName: String,

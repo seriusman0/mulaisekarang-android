@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.ChatRepository
 import com.mulaisekarang.app.data.model.Conversation
 import com.mulaisekarang.app.data.network.userMessage
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,6 +24,9 @@ class ChatListViewModel(private val repository: ChatRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatListUiState())
     val uiState: StateFlow<ChatListUiState> = _uiState.asStateFlow()
 
+    private val _openConversationEvent = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+    val openConversationEvent: SharedFlow<Int> = _openConversationEvent
+
     init {
         load()
     }
@@ -32,6 +37,14 @@ class ChatListViewModel(private val repository: ChatRepository) : ViewModel() {
             runCatching { repository.conversations() }
                 .onSuccess { conversations -> _uiState.update { it.copy(conversations = conversations, isLoading = false) } }
                 .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.userMessage("Gagal memuat percakapan.")) } }
+        }
+    }
+
+    fun openAiTutor() {
+        viewModelScope.launch {
+            runCatching { repository.startAiTutorConversation() }
+                .onSuccess { conversation -> _openConversationEvent.emit(conversation.id) }
+                .onFailure { e -> _uiState.update { it.copy(error = e.userMessage("Gagal membuka AI Tutor.")) } }
         }
     }
 }

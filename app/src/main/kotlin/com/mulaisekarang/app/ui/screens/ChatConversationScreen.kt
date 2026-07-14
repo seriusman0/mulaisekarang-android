@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -54,6 +55,7 @@ fun ChatConversationScreen(
     onBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val conversation by viewModel.conversation.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, viewModel) {
@@ -76,7 +78,20 @@ fun ChatConversationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Chat") },
+                title = {
+                    val current = conversation
+                    val isGroup = current?.type == "group"
+                    val title = if (isGroup) current?.title ?: "Grup" else current?.otherParty?.displayName ?: "Chat"
+                    Column {
+                        Text(title)
+                        if (isGroup) {
+                            Text(
+                                "${current?.participants?.size ?: 0} peserta",
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
@@ -112,7 +127,13 @@ fun ChatConversationScreen(
                             .fillMaxWidth()
                             .weight(1f),
                     ) {
-                        items(state.messages, key = { it.id }) { message -> MessageBubble(message) }
+                        items(state.messages, key = { it.id }) { message ->
+                            MessageBubble(
+                                message,
+                                isAiTutor = conversation?.type == "ai" && !message.isMine,
+                                showSenderName = conversation?.type == "group" && !message.isMine,
+                            )
+                        }
                     }
                 }
             }
@@ -143,19 +164,44 @@ fun ChatConversationScreen(
 }
 
 @Composable
-private fun MessageBubble(message: ChatMessage) {
-    val bubbleColor = if (message.isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (message.isMine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+private fun MessageBubble(message: ChatMessage, isAiTutor: Boolean = false, showSenderName: Boolean = false) {
+    val bubbleColor = when {
+        message.isMine -> MaterialTheme.colorScheme.primary
+        isAiTutor -> MaterialTheme.colorScheme.inverseSurface
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+    val textColor = when {
+        message.isMine -> MaterialTheme.colorScheme.onPrimary
+        isAiTutor -> MaterialTheme.colorScheme.inverseOnSurface
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
     val alignment = if (message.isMine) Alignment.CenterEnd else Alignment.CenterStart
 
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = alignment) {
-        Box(
+        Column(
             modifier = Modifier
                 .widthIn(max = 280.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(bubbleColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
+            if (isAiTutor) {
+                Text(
+                    "AI TUTOR RESPONSE",
+                    color = MaterialTheme.colorScheme.tertiary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 2.dp),
+                )
+            } else if (showSenderName && message.senderName != null) {
+                Text(
+                    message.senderName,
+                    color = textColor,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 2.dp),
+                )
+            }
             Text(message.body ?: "", color = textColor, style = MaterialTheme.typography.bodyMedium)
         }
     }

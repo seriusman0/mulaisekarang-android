@@ -1,5 +1,6 @@
 package com.mulaisekarang.app.ui.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -7,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.mulaisekarang.app.auth.GoogleAuthClient
 import com.mulaisekarang.app.viewmodel.AuthViewModel
@@ -36,8 +39,9 @@ fun GoogleSignInButton(
             }
         },
         enabled = enabled,
+        shape = RoundedCornerShape(20.dp),
         modifier = modifier,
     ) {
-        Text(label)
+        Text(label, fontWeight = FontWeight.Bold)
     }
 }

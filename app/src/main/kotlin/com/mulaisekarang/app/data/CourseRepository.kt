@@ -12,11 +12,13 @@ class CourseRepository(private val api: ApiService) {
         search: String? = null,
         category: String? = null,
         sort: String? = null,
+        featured: Boolean? = null,
         page: Int = 1,
     ): CoursesResponse = api.courses(
         search = search?.takeIf { it.isNotBlank() },
         categories = category?.let { listOf(it) } ?: emptyList(),
         sort = sort,
+        featured = featured,
         page = page,
     )
 

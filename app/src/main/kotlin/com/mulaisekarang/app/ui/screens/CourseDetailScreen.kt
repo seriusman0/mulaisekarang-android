@@ -23,8 +23,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -80,6 +83,10 @@ fun CourseDetailScreen(
     onBack: () -> Unit,
     onChatWithMentor: (username: String) -> Unit,
     onLessonClick: (lessonId: Int) -> Unit,
+    onInstructorClick: (username: String) -> Unit,
+    onQuizClick: (quizId: Int) -> Unit,
+    onAssignmentClick: (assignmentId: Int) -> Unit,
+    onBuyNow: (courseId: Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -229,7 +236,9 @@ fun CourseDetailScreen(
                                 }
                                 if (!course.isEnrolled) {
                                     Button(
-                                        onClick = { viewModel.checkout() },
+                                        onClick = {
+                                            if (course.currentPrice <= 0.0) viewModel.checkout() else onBuyNow(courseId)
+                                        },
                                         enabled = !isCheckingOut,
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier
@@ -249,6 +258,7 @@ fun CourseDetailScreen(
                         item {
                             MentorCard(
                                 mentor = mentor,
+                                onClick = mentor.username?.let { username -> { onInstructorClick(username) } },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 24.dp),
@@ -292,7 +302,9 @@ fun CourseDetailScreen(
                         }
                     }
 
-                    items(course.topics, key = { it.id }) { topic -> TopicSection(topic, onLessonClick) }
+                    items(course.topics, key = { it.id }) { topic ->
+                        TopicSection(topic, onLessonClick, onQuizClick, onAssignmentClick)
+                    }
                 }
             }
         }
@@ -300,8 +312,9 @@ fun CourseDetailScreen(
 }
 
 @Composable
-private fun MentorCard(mentor: Mentor, modifier: Modifier = Modifier) {
+private fun MentorCard(mentor: Mentor, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     Card(
+        onClick = onClick ?: {},
         shape = RoundedCornerShape(16.dp),
         modifier = modifier,
     ) {
@@ -317,7 +330,11 @@ private fun MentorCard(mentor: Mentor, modifier: Modifier = Modifier) {
                     .size(56.dp)
                     .clip(CircleShape),
             )
-            Column(modifier = Modifier.padding(start = 12.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
+            ) {
                 Text(
                     "Bertemu Mentor",
                     style = MaterialTheme.typography.labelSmall,
@@ -348,12 +365,24 @@ private fun MentorCard(mentor: Mentor, modifier: Modifier = Modifier) {
                     )
                 }
             }
+            if (onClick != null) {
+                Icon(
+                    Icons.Filled.ChevronRight,
+                    contentDescription = "Lihat profil instruktur",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun TopicSection(topic: Topic, onLessonClick: (Int) -> Unit) {
+private fun TopicSection(
+    topic: Topic,
+    onLessonClick: (Int) -> Unit,
+    onQuizClick: (Int) -> Unit,
+    onAssignmentClick: (Int) -> Unit,
+) {
     var expanded by remember { mutableStateOf(true) }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -419,6 +448,69 @@ private fun TopicSection(topic: Topic, onLessonClick: (Int) -> Unit) {
                                 modifier = Modifier.padding(start = 8.dp),
                             )
                         }
+                    }
+                }
+            }
+            topic.quizzes.forEach { quiz ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable { onQuizClick(quiz.id) }
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Quiz,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(quiz.title, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "KUIS · ${quiz.questionsCount} pertanyaan",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    quiz.myBestScore?.let {
+                        Text(
+                            "$it",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+            topic.assignments.forEach { assignment ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clickable { onAssignmentClick(assignment.id) }
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                ) {
+                    Icon(
+                        Icons.Filled.Assignment,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(assignment.title, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "TUGAS · ${assignment.totalPoints} poin",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (assignment.mySubmissionStatus != null) {
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = "Sudah dikumpulkan",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                 }
             }

@@ -2,7 +2,9 @@ package com.mulaisekarang.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mulaisekarang.app.data.CourseRepository
 import com.mulaisekarang.app.data.EnrollmentRepository
+import com.mulaisekarang.app.data.model.Course
 import com.mulaisekarang.app.data.model.Enrollment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,11 +14,15 @@ import kotlinx.coroutines.launch
 
 data class MyCoursesUiState(
     val enrollments: List<Enrollment> = emptyList(),
+    val recommended: List<Course> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
 )
 
-class MyCoursesViewModel(private val repository: EnrollmentRepository) : ViewModel() {
+class MyCoursesViewModel(
+    private val repository: EnrollmentRepository,
+    private val courseRepository: CourseRepository,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MyCoursesUiState())
     val uiState: StateFlow<MyCoursesUiState> = _uiState.asStateFlow()
@@ -31,6 +37,9 @@ class MyCoursesViewModel(private val repository: EnrollmentRepository) : ViewMod
             runCatching { repository.myCourses() }
                 .onSuccess { response -> _uiState.update { it.copy(enrollments = response.data, isLoading = false) } }
                 .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "Gagal memuat kursus saya.") } }
+
+            runCatching { courseRepository.courses(featured = true) }
+                .onSuccess { response -> _uiState.update { it.copy(recommended = response.data) } }
         }
     }
 }

@@ -22,6 +22,9 @@ object NetworkModule {
         val client = OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(tokenStore))
             .addInterceptor(SessionExpiredInterceptor(tokenStore, sessionEventBus))
+            .addInterceptor { chain ->
+                chain.proceed(chain.request().newBuilder().addHeader("X-Client", "android").build())
+            }
             .addInterceptor(logging)
             .build()
 
