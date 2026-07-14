@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.AuthRepository
 import com.mulaisekarang.app.data.model.User
 import com.mulaisekarang.app.data.network.userMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,7 +29,8 @@ sealed interface ProfileUpdateEvent {
     data class Error(val message: String) : ProfileUpdateEvent
 }
 
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Checking)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()

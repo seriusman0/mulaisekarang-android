@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -89,6 +90,7 @@ fun CourseDetailScreen(
     onBuyNow: (courseId: Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isSyncing = (uiState as? CourseDetailUiState.Loaded)?.isSyncing == true
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -125,6 +127,16 @@ fun CourseDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Kembali")
+                    }
+                },
+                actions = {
+                    if (isSyncing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .padding(end = 16.dp),
+                            strokeWidth = 2.dp,
+                        )
                     }
                 },
             )

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.ChatRepository
 import com.mulaisekarang.app.data.model.Mentor
 import com.mulaisekarang.app.data.network.userMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,7 +24,8 @@ data class NewGroupUiState(
     val error: String? = null,
 )
 
-class NewGroupViewModel(private val repository: ChatRepository) : ViewModel() {
+@HiltViewModel
+class NewGroupViewModel @Inject constructor(private val repository: ChatRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NewGroupUiState())
     val uiState: StateFlow<NewGroupUiState> = _uiState.asStateFlow()

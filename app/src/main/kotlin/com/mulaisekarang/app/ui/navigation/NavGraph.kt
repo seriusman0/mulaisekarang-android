@@ -1,17 +1,18 @@
 package com.mulaisekarang.app.ui.navigation
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,8 +20,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.mulaisekarang.app.AppContainer
 import com.mulaisekarang.app.data.network.SESSION_EXPIRED_MESSAGE
+import com.mulaisekarang.app.data.network.SessionEventBus
 import com.mulaisekarang.app.ui.components.GlassBottomNavBar
 import com.mulaisekarang.app.ui.screens.ChatConversationScreen
 import com.mulaisekarang.app.ui.screens.ChatListScreen
@@ -58,7 +59,6 @@ import com.mulaisekarang.app.viewmodel.NewGroupViewModel
 import com.mulaisekarang.app.viewmodel.PaymentSuccessViewModel
 import com.mulaisekarang.app.viewmodel.QuizViewModel
 import com.mulaisekarang.app.viewmodel.ResetPasswordViewModel
-import kotlinx.coroutines.launch
 
 private object Routes {
     const val SPLASH = "splash"
@@ -97,20 +97,18 @@ private object Routes {
 
 @Composable
 fun MulaiSekarangNavGraph(
-    appContainer: AppContainer,
+    sessionEventBus: SessionEventBus,
     deepLink: android.net.Uri? = null,
     onDeepLinkConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val coroutineScope = rememberCoroutineScope()
-    val authViewModel: AuthViewModel = viewModel(
-        factory = viewModelFactoryOf { AuthViewModel(appContainer.authRepository) },
-    )
+    val activity = LocalContext.current as ComponentActivity
+    val authViewModel: AuthViewModel = hiltViewModel(activity)
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
     LaunchedEffect(Unit) {
-        appContainer.sessionEventBus.events.collect {
+        sessionEventBus.events.collect {
             authViewModel.reportError(SESSION_EXPIRED_MESSAGE)
             navController.navigate(Routes.LOGIN) {
                 popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
@@ -183,9 +181,7 @@ fun MulaiSekarangNavGraph(
             }
 
             composable(Routes.FORGOT_PASSWORD) {
-                val forgotPasswordViewModel: ForgotPasswordViewModel = viewModel(
-                    factory = viewModelFactoryOf { ForgotPasswordViewModel(appContainer.authRepository) },
-                )
+                val forgotPasswordViewModel: ForgotPasswordViewModel = hiltViewModel()
                 ForgotPasswordScreen(
                     viewModel = forgotPasswordViewModel,
                     onBack = { navController.popBackStack() },
@@ -200,9 +196,7 @@ fun MulaiSekarangNavGraph(
                 arguments = listOf(navArgument("email") { type = NavType.StringType }),
             ) { backStack ->
                 val email = backStack.arguments?.getString("email")?.let { android.net.Uri.decode(it) } ?: ""
-                val resetPasswordViewModel: ResetPasswordViewModel = viewModel(
-                    factory = viewModelFactoryOf { ResetPasswordViewModel(appContainer.authRepository) },
-                )
+                val resetPasswordViewModel: ResetPasswordViewModel = hiltViewModel()
                 ResetPasswordScreen(
                     viewModel = resetPasswordViewModel,
                     email = email,
@@ -228,9 +222,7 @@ fun MulaiSekarangNavGraph(
             }
 
             composable(Routes.HOME) {
-                val homeViewModel: HomeViewModel = viewModel(
-                    factory = viewModelFactoryOf { HomeViewModel(appContainer.dashboardRepository, appContainer.courseRepository) },
-                )
+                val homeViewModel: HomeViewModel = hiltViewModel()
                 HomeScreen(
                     viewModel = homeViewModel,
                     authViewModel = authViewModel,
@@ -246,9 +238,7 @@ fun MulaiSekarangNavGraph(
             }
 
             composable(Routes.MARKETPLACE) {
-                val marketplaceViewModel: MarketplaceViewModel = viewModel(
-                    factory = viewModelFactoryOf { MarketplaceViewModel(appContainer.courseRepository) },
-                )
+                val marketplaceViewModel: MarketplaceViewModel = hiltViewModel()
                 MarketplaceScreen(
                     viewModel = marketplaceViewModel,
                     onCourseClick = { navController.navigate(Routes.courseDetail(it)) },
@@ -256,11 +246,7 @@ fun MulaiSekarangNavGraph(
             }
 
             composable(Routes.MY_COURSES) {
-                val myCoursesViewModel: MyCoursesViewModel = viewModel(
-                    factory = viewModelFactoryOf {
-                        MyCoursesViewModel(appContainer.enrollmentRepository, appContainer.courseRepository)
-                    },
-                )
+                val myCoursesViewModel: MyCoursesViewModel = hiltViewModel()
                 MyCoursesScreen(
                     viewModel = myCoursesViewModel,
                     onCourseClick = { navController.navigate(Routes.courseDetail(it)) },
@@ -275,9 +261,7 @@ fun MulaiSekarangNavGraph(
             }
 
             composable(Routes.CHAT_LIST) { backStack ->
-                val chatListViewModel: ChatListViewModel = viewModel(
-                    factory = viewModelFactoryOf { ChatListViewModel(appContainer.chatRepository) },
-                )
+                val chatListViewModel: ChatListViewModel = hiltViewModel()
                 DisposableEffect(backStack) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) chatListViewModel.load()
@@ -293,9 +277,7 @@ fun MulaiSekarangNavGraph(
             }
 
             composable(Routes.NEW_GROUP) {
-                val newGroupViewModel: NewGroupViewModel = viewModel(
-                    factory = viewModelFactoryOf { NewGroupViewModel(appContainer.chatRepository) },
-                )
+                val newGroupViewModel: NewGroupViewModel = hiltViewModel()
                 NewGroupScreen(
                     viewModel = newGroupViewModel,
                     onBack = { navController.popBackStack() },
@@ -310,13 +292,8 @@ fun MulaiSekarangNavGraph(
             composable(
                 Routes.CHAT_CONVERSATION,
                 arguments = listOf(navArgument("conversationId") { type = NavType.IntType }),
-            ) { backStack ->
-                val conversationId = backStack.arguments?.getInt("conversationId") ?: return@composable
-                val chatConversationViewModel: ChatConversationViewModel = viewModel(
-                    factory = viewModelFactoryOf {
-                        ChatConversationViewModel(appContainer.chatRepository, conversationId)
-                    },
-                )
+            ) {
+                val chatConversationViewModel: ChatConversationViewModel = hiltViewModel()
                 ChatConversationScreen(
                     viewModel = chatConversationViewModel,
                     onBack = { navController.popBackStack() },
@@ -328,9 +305,7 @@ fun MulaiSekarangNavGraph(
                 arguments = listOf(navArgument("courseId") { type = NavType.IntType }),
             ) { backStack ->
                 val courseId = backStack.arguments?.getInt("courseId") ?: return@composable
-                val detailViewModel: CourseDetailViewModel = viewModel(
-                    factory = viewModelFactoryOf { CourseDetailViewModel(appContainer.courseRepository) },
-                )
+                val detailViewModel: CourseDetailViewModel = hiltViewModel()
                 DisposableEffect(backStack) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) detailViewModel.checkPendingPayment()
@@ -343,11 +318,8 @@ fun MulaiSekarangNavGraph(
                     viewModel = detailViewModel,
                     onBack = { navController.popBackStack() },
                     onChatWithMentor = { username ->
-                        coroutineScope.launch {
-                            runCatching { appContainer.chatRepository.startConversation(username) }
-                                .onSuccess { conversation ->
-                                    navController.navigate(Routes.chatConversation(conversation.id))
-                                }
+                        detailViewModel.startConversationWithMentor(username) { conversation ->
+                            conversation?.let { navController.navigate(Routes.chatConversation(it.id)) }
                         }
                     },
                     onLessonClick = { lessonId ->
@@ -367,9 +339,7 @@ fun MulaiSekarangNavGraph(
                 arguments = listOf(navArgument("courseId") { type = NavType.IntType }),
             ) { backStack ->
                 val checkoutCourseId = backStack.arguments?.getInt("courseId") ?: return@composable
-                val checkoutViewModel: CourseDetailViewModel = viewModel(
-                    factory = viewModelFactoryOf { CourseDetailViewModel(appContainer.courseRepository) },
-                )
+                val checkoutViewModel: CourseDetailViewModel = hiltViewModel()
                 CheckoutSummaryScreen(
                     courseId = checkoutCourseId,
                     viewModel = checkoutViewModel,
@@ -380,11 +350,8 @@ fun MulaiSekarangNavGraph(
             composable(
                 Routes.PAYMENT_SUCCESS,
                 arguments = listOf(navArgument("referenceId") { type = NavType.StringType }),
-            ) { backStack ->
-                val referenceId = backStack.arguments?.getString("referenceId")?.let { android.net.Uri.decode(it) } ?: return@composable
-                val paymentSuccessViewModel: PaymentSuccessViewModel = viewModel(
-                    factory = viewModelFactoryOf { PaymentSuccessViewModel(appContainer.courseRepository, referenceId) },
-                )
+            ) {
+                val paymentSuccessViewModel: PaymentSuccessViewModel = hiltViewModel()
                 PaymentSuccessScreen(
                     viewModel = paymentSuccessViewModel,
                     onStartLearning = {
@@ -407,11 +374,8 @@ fun MulaiSekarangNavGraph(
             composable(
                 Routes.QUIZ,
                 arguments = listOf(navArgument("quizId") { type = NavType.IntType }),
-            ) { backStack ->
-                val quizId = backStack.arguments?.getInt("quizId") ?: return@composable
-                val quizViewModel: QuizViewModel = viewModel(
-                    factory = viewModelFactoryOf { QuizViewModel(appContainer.quizRepository, quizId) },
-                )
+            ) {
+                val quizViewModel: QuizViewModel = hiltViewModel()
                 QuizScreen(
                     viewModel = quizViewModel,
                     onBack = { navController.popBackStack() },
@@ -421,11 +385,8 @@ fun MulaiSekarangNavGraph(
             composable(
                 Routes.ASSIGNMENT,
                 arguments = listOf(navArgument("assignmentId") { type = NavType.IntType }),
-            ) { backStack ->
-                val assignmentId = backStack.arguments?.getInt("assignmentId") ?: return@composable
-                val assignmentViewModel: AssignmentViewModel = viewModel(
-                    factory = viewModelFactoryOf { AssignmentViewModel(appContainer.assignmentRepository, assignmentId) },
-                )
+            ) {
+                val assignmentViewModel: AssignmentViewModel = hiltViewModel()
                 AssignmentScreen(
                     viewModel = assignmentViewModel,
                     onBack = { navController.popBackStack() },
@@ -435,11 +396,8 @@ fun MulaiSekarangNavGraph(
             composable(
                 Routes.INSTRUCTOR_PROFILE,
                 arguments = listOf(navArgument("username") { type = NavType.StringType }),
-            ) { backStack ->
-                val username = backStack.arguments?.getString("username")?.let { android.net.Uri.decode(it) } ?: return@composable
-                val instructorProfileViewModel: InstructorProfileViewModel = viewModel(
-                    factory = viewModelFactoryOf { InstructorProfileViewModel(appContainer.instructorRepository, username) },
-                )
+            ) {
+                val instructorProfileViewModel: InstructorProfileViewModel = hiltViewModel()
                 InstructorProfileScreen(
                     viewModel = instructorProfileViewModel,
                     onBack = { navController.popBackStack() },
@@ -456,11 +414,7 @@ fun MulaiSekarangNavGraph(
             ) { backStack ->
                 val lessonCourseId = backStack.arguments?.getInt("courseId") ?: return@composable
                 val lessonId = backStack.arguments?.getInt("lessonId") ?: return@composable
-                val lessonPlayerViewModel: LessonPlayerViewModel = viewModel(
-                    factory = viewModelFactoryOf {
-                        LessonPlayerViewModel(appContainer.lessonRepository, appContainer.tokenStore, lessonCourseId, lessonId)
-                    },
-                )
+                val lessonPlayerViewModel: LessonPlayerViewModel = hiltViewModel()
                 LessonPlayerScreen(
                     viewModel = lessonPlayerViewModel,
                     onNavigateToLesson = { nextLessonId ->

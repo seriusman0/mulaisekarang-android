@@ -2,57 +2,67 @@ package com.mulaisekarang.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.mulaisekarang.app.data.CourseRepository
 import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.data.model.Course
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class MarketplaceUiState(
-    val courses: List<Course> = emptyList(),
+data class MarketplaceFilterState(
     val categories: List<Category> = emptyList(),
     val selectedCategorySlug: String? = null,
     val search: String = "",
-    val isLoading: Boolean = false,
-    val error: String? = null,
 )
 
-class MarketplaceViewModel(private val repository: CourseRepository) : ViewModel() {
+@HiltViewModel
+class MarketplaceViewModel @Inject constructor(private val repository: CourseRepository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MarketplaceUiState())
-    val uiState: StateFlow<MarketplaceUiState> = _uiState.asStateFlow()
+    private val _filterState = MutableStateFlow(MarketplaceFilterState())
+    val filterState: StateFlow<MarketplaceFilterState> = _filterState.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pagedCourses: Flow<PagingData<Course>> = _filterState
+        .map { it.search to it.selectedCategorySlug }
+        .distinctUntilChanged()
+        .flatMapLatest { (search, category) ->
+            if (search.isBlank() && category == null) {
+                repository.pagedCourses()
+            } else {
+                repository.pagedCoursesFiltered(search = search, category = category, sort = null)
+            }
+        }
+        .cachedIn(viewModelScope)
 
     init {
         loadCategories()
-        loadCourses()
     }
 
     private fun loadCategories() {
         viewModelScope.launch {
             runCatching { repository.categories() }
-                .onSuccess { categories -> _uiState.update { it.copy(categories = categories) } }
-        }
-    }
-
-    fun loadCourses() {
-        _uiState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
-            val state = _uiState.value
-            runCatching { repository.courses(search = state.search, category = state.selectedCategorySlug) }
-                .onSuccess { response -> _uiState.update { it.copy(courses = response.data, isLoading = false) } }
-                .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.message ?: "Gagal memuat course.") } }
+                .onSuccess { categories -> _filterState.update { it.copy(categories = categories) } }
         }
     }
 
     fun onSearchChange(value: String) {
-        _uiState.update { it.copy(search = value) }
+        _filterState.update { it.copy(search = value) }
     }
 
     fun onCategorySelect(slug: String?) {
-        _uiState.update { it.copy(selectedCategorySlug = if (it.selectedCategorySlug == slug) null else slug) }
-        loadCourses()
+        _filterState.update {
+            it.copy(selectedCategorySlug = if (it.selectedCategorySlug == slug) null else slug)
+        }
     }
 }

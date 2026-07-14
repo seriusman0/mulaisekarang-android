@@ -6,6 +6,8 @@ import com.mulaisekarang.app.data.CourseRepository
 import com.mulaisekarang.app.data.DashboardRepository
 import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.data.model.Course
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +22,8 @@ data class HomeUiState(
     val error: String? = null,
 )
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val dashboardRepository: DashboardRepository,
     private val courseRepository: CourseRepository,
 ) : ViewModel() {

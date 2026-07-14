@@ -3,8 +3,9 @@ package com.mulaisekarang.app.data
 import com.mulaisekarang.app.data.model.CompleteLessonResult
 import com.mulaisekarang.app.data.model.LessonDetail
 import com.mulaisekarang.app.data.network.ApiService
+import javax.inject.Inject
 
-class LessonRepository(private val api: ApiService) {
+class LessonRepository @Inject constructor(private val api: ApiService) {
 
     suspend fun lessonDetail(courseId: Int, lessonId: Int): LessonDetail =
         api.lessonDetail(courseId, lessonId).data

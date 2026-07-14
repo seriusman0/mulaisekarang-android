@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.AuthRepository
 import com.mulaisekarang.app.data.network.userMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +18,8 @@ sealed interface ForgotPasswordUiState {
     data class Error(val message: String) : ForgotPasswordUiState
 }
 
-class ForgotPasswordViewModel(private val repository: AuthRepository) : ViewModel() {
+@HiltViewModel
+class ForgotPasswordViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ForgotPasswordUiState>(ForgotPasswordUiState.Idle)
     val uiState: StateFlow<ForgotPasswordUiState> = _uiState.asStateFlow()

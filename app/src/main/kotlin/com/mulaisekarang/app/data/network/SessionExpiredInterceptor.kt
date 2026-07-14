@@ -1,11 +1,12 @@
 package com.mulaisekarang.app.data.network
 
 import com.mulaisekarang.app.data.TokenStore
+import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class SessionExpiredInterceptor(
+class SessionExpiredInterceptor @Inject constructor(
     private val tokenStore: TokenStore,
     private val sessionEventBus: SessionEventBus,
 ) : Interceptor {

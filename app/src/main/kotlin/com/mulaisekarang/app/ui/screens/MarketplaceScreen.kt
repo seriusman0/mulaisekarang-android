@@ -2,6 +2,7 @@ package com.mulaisekarang.app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +29,14 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.ui.components.CourseCard
 import com.mulaisekarang.app.ui.components.EmptyState
@@ -44,7 +50,9 @@ fun MarketplaceScreen(
     viewModel: MarketplaceViewModel,
     onCourseClick: (Int) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val filterState by viewModel.filterState.collectAsState()
+    val lazyPagingItems = viewModel.pagedCourses.collectAsLazyPagingItems()
+    val refreshState = lazyPagingItems.loadState.refresh
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
         Column(modifier = Modifier.padding(padding)) {
@@ -58,11 +66,8 @@ fun MarketplaceScreen(
             )
 
             OutlinedTextField(
-                value = uiState.search,
-                onValueChange = {
-                    viewModel.onSearchChange(it)
-                    viewModel.loadCourses()
-                },
+                value = filterState.search,
+                onValueChange = { viewModel.onSearchChange(it) },
                 placeholder = { Text("Cari kursus atau keahlian baru...") },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
@@ -84,43 +89,43 @@ fun MarketplaceScreen(
                 item {
                     CategoryChip(
                         label = "Semua",
-                        selected = uiState.selectedCategorySlug == null,
+                        selected = filterState.selectedCategorySlug == null,
                         onClick = { viewModel.onCategorySelect(null) },
                     )
                 }
-                items(uiState.categories, key = { it.slug }) { category: Category ->
+                items(filterState.categories, key = { it.slug }) { category: Category ->
                     CategoryChip(
                         label = category.name,
-                        selected = uiState.selectedCategorySlug == category.slug,
+                        selected = filterState.selectedCategorySlug == category.slug,
                         onClick = { viewModel.onCategorySelect(category.slug) },
                     )
                 }
             }
 
-            val sectionTitle = if (uiState.search.isNotBlank() || uiState.selectedCategorySlug != null) {
+            val sectionTitle = if (filterState.search.isNotBlank() || filterState.selectedCategorySlug != null) {
                 "Hasil Pencarian"
             } else {
                 "Semua Kursus"
             }
             Text(
-                "$sectionTitle (${uiState.courses.size})",
+                "$sectionTitle (${lazyPagingItems.itemCount})",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
             )
 
             PullToRefreshBox(
-                isRefreshing = uiState.isLoading,
-                onRefresh = { viewModel.loadCourses() },
+                isRefreshing = refreshState is LoadState.Loading,
+                onRefresh = { lazyPagingItems.refresh() },
                 modifier = Modifier.fillMaxSize(),
             ) {
                 when {
-                    uiState.error != null -> ErrorState(
-                        message = uiState.error ?: "Terjadi kesalahan.",
-                        onRetry = { viewModel.loadCourses() },
+                    refreshState is LoadState.Error -> ErrorState(
+                        message = refreshState.error.message ?: "Terjadi kesalahan.",
+                        onRetry = { lazyPagingItems.retry() },
                     )
 
-                    uiState.courses.isEmpty() && !uiState.isLoading -> EmptyState(
+                    lazyPagingItems.itemCount == 0 && refreshState !is LoadState.Loading -> EmptyState(
                         message = "Tidak ada course yang ditemukan. Coba kata kunci atau kategori lain.",
                     )
 
@@ -129,7 +134,11 @@ fun MarketplaceScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        items(uiState.courses, key = { it.id }) { course ->
+                        items(
+                            count = lazyPagingItems.itemCount,
+                            key = lazyPagingItems.itemKey { it.id },
+                        ) { index ->
+                            val course = lazyPagingItems[index] ?: return@items
                             CourseCard(
                                 title = course.title,
                                 coverImageUrl = course.coverImageUrl,
@@ -156,6 +165,19 @@ fun MarketplaceScreen(
                                         tint = MaterialTheme.colorScheme.outlineVariant,
                                         modifier = Modifier.padding(2.dp),
                                     )
+                                }
+                            }
+                        }
+
+                        if (lazyPagingItems.loadState.append is LoadState.Loading) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator()
                                 }
                             }
                         }

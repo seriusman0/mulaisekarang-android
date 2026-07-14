@@ -1,10 +1,14 @@
 package com.mulaisekarang.app.viewmodel
 
+import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.InstructorRepository
 import com.mulaisekarang.app.data.model.Course
 import com.mulaisekarang.app.data.model.InstructorDetail
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,10 +22,13 @@ data class InstructorProfileUiState(
     val error: String? = null,
 )
 
-class InstructorProfileViewModel(
+@HiltViewModel
+class InstructorProfileViewModel @Inject constructor(
     private val repository: InstructorRepository,
-    private val username: String,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val username: String = Uri.decode(checkNotNull(savedStateHandle["username"]))
 
     private val _uiState = MutableStateFlow(InstructorProfileUiState())
     val uiState: StateFlow<InstructorProfileUiState> = _uiState.asStateFlow()

@@ -2,19 +2,26 @@ package com.mulaisekarang.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mulaisekarang.app.data.ChatRepository
 import com.mulaisekarang.app.data.CourseRepository
+import com.mulaisekarang.app.data.model.Conversation
 import com.mulaisekarang.app.data.model.CourseDetail
 import com.mulaisekarang.app.data.network.userMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed interface CourseDetailUiState {
     data object Loading : CourseDetailUiState
-    data class Loaded(val course: CourseDetail) : CourseDetailUiState
+    data class Loaded(val course: CourseDetail, val isSyncing: Boolean = false) : CourseDetailUiState
     data class Error(val message: String) : CourseDetailUiState
 }
 
@@ -25,10 +32,29 @@ sealed interface CheckoutEvent {
     data class Error(val message: String) : CheckoutEvent
 }
 
-class CourseDetailViewModel(private val repository: CourseRepository) : ViewModel() {
+@HiltViewModel
+class CourseDetailViewModel @Inject constructor(
+    private val repository: CourseRepository,
+    private val chatRepository: ChatRepository,
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<CourseDetailUiState>(CourseDetailUiState.Loading)
-    val uiState: StateFlow<CourseDetailUiState> = _uiState.asStateFlow()
+    private val cachedCourse = MutableStateFlow<CourseDetail?>(null)
+    private val isSyncing = MutableStateFlow(false)
+    private val syncError = MutableStateFlow<String?>(null)
+    private var observeJob: Job? = null
+
+    /**
+     * Instant paint from Room (cachedCourse), background-sync progress and errors layered
+     * on top — a sync failure only surfaces as an Error state when there's no cached data
+     * to fall back on, so a stale screen never gets yanked to an error view (PRD 3.2).
+     */
+    val uiState: StateFlow<CourseDetailUiState> = combine(cachedCourse, isSyncing, syncError) { course, syncing, error ->
+        when {
+            course != null -> CourseDetailUiState.Loaded(course, isSyncing = syncing)
+            error != null -> CourseDetailUiState.Error(error)
+            else -> CourseDetailUiState.Loading
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CourseDetailUiState.Loading)
 
     private val _checkoutEvent = MutableSharedFlow<CheckoutEvent>(extraBufferCapacity = 1)
     val checkoutEvent: SharedFlow<CheckoutEvent> = _checkoutEvent
@@ -38,11 +64,21 @@ class CourseDetailViewModel(private val repository: CourseRepository) : ViewMode
 
     fun load(courseId: Int) {
         this.courseId = courseId
-        _uiState.value = CourseDetailUiState.Loading
+        syncError.value = null
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            repository.courseDetail(courseId).collect { cachedCourse.value = it }
+        }
+        refresh()
+    }
+
+    fun refresh() {
+        val id = courseId
         viewModelScope.launch {
-            runCatching { repository.courseDetail(courseId) }
-                .onSuccess { _uiState.value = CourseDetailUiState.Loaded(it) }
-                .onFailure { _uiState.value = CourseDetailUiState.Error(it.userMessage("Gagal memuat detail course.")) }
+            isSyncing.value = true
+            runCatching { repository.refreshCourseDetail(id) }
+                .onFailure { e -> syncError.value = e.userMessage("Gagal memuat detail course.") }
+            isSyncing.value = false
         }
     }
 
@@ -54,7 +90,7 @@ class CourseDetailViewModel(private val repository: CourseRepository) : ViewMode
                     if (response.status == "completed") {
                         pendingReferenceId = null
                         _checkoutEvent.emit(CheckoutEvent.EnrolledFree)
-                        load(courseId)
+                        refresh()
                     } else {
                         pendingReferenceId = response.referenceId
                         response.invoiceUrl?.let { _checkoutEvent.emit(CheckoutEvent.OpenInvoice(it)) }
@@ -71,9 +107,16 @@ class CourseDetailViewModel(private val repository: CourseRepository) : ViewMode
                 .onSuccess { status ->
                     if (status == "completed") {
                         pendingReferenceId = null
-                        load(courseId)
+                        refresh()
                     }
                 }
+        }
+    }
+
+    fun startConversationWithMentor(username: String, onResult: (Conversation?) -> Unit) {
+        viewModelScope.launch {
+            val conversation = runCatching { chatRepository.startConversation(username) }.getOrNull()
+            onResult(conversation)
         }
     }
 }

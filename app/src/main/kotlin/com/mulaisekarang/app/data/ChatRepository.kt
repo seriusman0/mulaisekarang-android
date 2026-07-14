@@ -7,8 +7,9 @@ import com.mulaisekarang.app.data.model.Mentor
 import com.mulaisekarang.app.data.model.SendMessageRequest
 import com.mulaisekarang.app.data.model.StartConversationRequest
 import com.mulaisekarang.app.data.network.ApiService
+import javax.inject.Inject
 
-class ChatRepository(private val api: ApiService) {
+class ChatRepository @Inject constructor(private val api: ApiService) {
 
     suspend fun conversations(): List<Conversation> = api.conversations().data
 

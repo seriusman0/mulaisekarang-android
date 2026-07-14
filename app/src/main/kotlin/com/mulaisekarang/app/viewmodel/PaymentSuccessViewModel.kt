@@ -1,8 +1,12 @@
 package com.mulaisekarang.app.viewmodel
 
+import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.CourseRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,10 +20,13 @@ sealed interface PaymentVerifyState {
     data class Error(val message: String) : PaymentVerifyState
 }
 
-class PaymentSuccessViewModel(
+@HiltViewModel
+class PaymentSuccessViewModel @Inject constructor(
     private val repository: CourseRepository,
-    private val referenceId: String,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val referenceId: String = Uri.decode(checkNotNull(savedStateHandle["referenceId"]))
 
     private val _uiState = MutableStateFlow<PaymentVerifyState>(PaymentVerifyState.Verifying)
     val uiState: StateFlow<PaymentVerifyState> = _uiState.asStateFlow()

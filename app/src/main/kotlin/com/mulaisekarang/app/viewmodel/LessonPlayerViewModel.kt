@@ -1,10 +1,13 @@
 package com.mulaisekarang.app.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.LessonRepository
 import com.mulaisekarang.app.data.TokenStore
 import com.mulaisekarang.app.data.model.LessonDetail
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,12 +28,15 @@ sealed interface LessonPlayerEvent {
     data object CourseCompleted : LessonPlayerEvent
 }
 
-class LessonPlayerViewModel(
+@HiltViewModel
+class LessonPlayerViewModel @Inject constructor(
     private val lessonRepository: LessonRepository,
     private val tokenStore: TokenStore,
-    private val courseId: Int,
-    private val lessonId: Int,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val courseId: Int = checkNotNull(savedStateHandle["courseId"])
+    private val lessonId: Int = checkNotNull(savedStateHandle["lessonId"])
 
     private val _uiState = MutableStateFlow<LessonPlayerUiState>(LessonPlayerUiState.Loading)
     val uiState: StateFlow<LessonPlayerUiState> = _uiState.asStateFlow()

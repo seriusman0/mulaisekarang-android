@@ -1,10 +1,13 @@
 package com.mulaisekarang.app.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.ChatRepository
 import com.mulaisekarang.app.data.model.ChatMessage
 import com.mulaisekarang.app.data.model.Conversation
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,10 +25,13 @@ sealed interface ChatConversationUiState {
     data class Error(val message: String) : ChatConversationUiState
 }
 
-class ChatConversationViewModel(
+@HiltViewModel
+class ChatConversationViewModel @Inject constructor(
     private val repository: ChatRepository,
-    private val conversationId: Int,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val conversationId: Int = checkNotNull(savedStateHandle["conversationId"])
 
     private val _uiState = MutableStateFlow<ChatConversationUiState>(ChatConversationUiState.Loading)
     val uiState: StateFlow<ChatConversationUiState> = _uiState.asStateFlow()

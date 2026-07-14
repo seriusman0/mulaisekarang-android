@@ -6,6 +6,8 @@ import com.mulaisekarang.app.data.CourseRepository
 import com.mulaisekarang.app.data.EnrollmentRepository
 import com.mulaisekarang.app.data.model.Course
 import com.mulaisekarang.app.data.model.Enrollment
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,8 @@ data class MyCoursesUiState(
     val error: String? = null,
 )
 
-class MyCoursesViewModel(
+@HiltViewModel
+class MyCoursesViewModel @Inject constructor(
     private val repository: EnrollmentRepository,
     private val courseRepository: CourseRepository,
 ) : ViewModel() {

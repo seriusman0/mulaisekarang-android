@@ -1,11 +1,14 @@
 package com.mulaisekarang.app.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.AssignmentRepository
 import com.mulaisekarang.app.data.model.AssignmentDetail
 import com.mulaisekarang.app.data.network.userMessage
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,10 +23,13 @@ data class AssignmentUiState(
     val error: String? = null,
 )
 
-class AssignmentViewModel(
+@HiltViewModel
+class AssignmentViewModel @Inject constructor(
     private val repository: AssignmentRepository,
-    private val assignmentId: Int,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val assignmentId: Int = checkNotNull(savedStateHandle["assignmentId"])
 
     private val _uiState = MutableStateFlow(AssignmentUiState())
     val uiState: StateFlow<AssignmentUiState> = _uiState.asStateFlow()

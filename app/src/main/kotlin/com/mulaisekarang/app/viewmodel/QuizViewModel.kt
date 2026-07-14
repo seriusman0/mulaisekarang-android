@@ -1,10 +1,13 @@
 package com.mulaisekarang.app.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.QuizRepository
 import com.mulaisekarang.app.data.model.QuizDetail
 import com.mulaisekarang.app.data.model.QuizResult
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,10 +24,13 @@ data class QuizUiState(
     val error: String? = null,
 )
 
-class QuizViewModel(
+@HiltViewModel
+class QuizViewModel @Inject constructor(
     private val repository: QuizRepository,
-    private val quizId: Int,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    private val quizId: Int = checkNotNull(savedStateHandle["quizId"])
 
     private val _uiState = MutableStateFlow(QuizUiState())
     val uiState: StateFlow<QuizUiState> = _uiState.asStateFlow()

@@ -48,6 +48,7 @@ data class Course(
     val mentor: Mentor? = null,
     val category: Category? = null,
     val tags: List<Tag> = emptyList(),
+    @SerialName("updated_at") val updatedAt: String? = null,
 )
 
 @Serializable
@@ -128,6 +129,29 @@ data class CourseDetail(
     val topics: List<Topic> = emptyList(),
     val reviews: List<Review> = emptyList(),
     @SerialName("next_lesson_id") val nextLessonId: Int? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+)
+
+fun CourseDetail.toCourseSummary(): Course = Course(
+    id = id,
+    title = title,
+    description = description,
+    coverImageUrl = coverImageUrl,
+    type = type,
+    level = level,
+    regularPrice = regularPrice,
+    salePrice = salePrice,
+    currentPrice = currentPrice,
+    hasDiscount = hasDiscount,
+    duration = duration,
+    isFeatured = isFeatured,
+    reviewsAvgRating = reviewsAvgRating,
+    enrollmentsCount = enrollmentsCount,
+    isEnrolled = isEnrolled,
+    mentor = mentor,
+    category = category,
+    tags = tags,
+    updatedAt = updatedAt,
 )
 
 @Serializable
