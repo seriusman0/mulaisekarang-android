@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.mulaisekarang.app.data.model.Lesson
 import com.mulaisekarang.app.data.model.Mentor
+import com.mulaisekarang.app.data.model.Review
 import com.mulaisekarang.app.data.model.Topic
 import com.mulaisekarang.app.ui.components.ErrorState
 import com.mulaisekarang.app.ui.components.HtmlText
@@ -317,7 +319,90 @@ fun CourseDetailScreen(
                     items(course.topics, key = { it.id }) { topic ->
                         TopicSection(topic, onLessonClick, onQuizClick, onAssignmentClick)
                     }
+
+                    if (course.reviews.isNotEmpty()) {
+                        item {
+                            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(top = 24.dp, bottom = 4.dp),
+                                ) {
+                                    Text(
+                                        "Ulasan",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    course.reviewsAvgRating?.let { avg ->
+                                        Icon(
+                                            Icons.Filled.Star,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier
+                                                .padding(start = 8.dp)
+                                                .size(16.dp),
+                                        )
+                                        Text(
+                                            String.format("%.1f", avg),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(start = 2.dp),
+                                        )
+                                        Text(
+                                            " (${course.reviews.size} ulasan)",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        items(course.reviews, key = { it.id }) { review ->
+                            ReviewCard(review, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+                        }
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewCard(review: Review, modifier: Modifier = Modifier) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    review.user?.displayName ?: "Pengguna",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                Row {
+                    repeat(5) { index ->
+                        Icon(
+                            Icons.Filled.Star,
+                            contentDescription = null,
+                            tint = if (index < review.rating) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant
+                            },
+                            modifier = Modifier.size(14.dp),
+                        )
+                    }
+                }
+            }
+            if (!review.body.isNullOrBlank()) {
+                Text(
+                    review.body,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
             }
         }
     }
