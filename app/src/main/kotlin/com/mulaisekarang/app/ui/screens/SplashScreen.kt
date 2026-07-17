@@ -43,7 +43,7 @@ fun SplashScreen(
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(R.drawable.ic_logo_mark),
+                painter = painterResource(R.drawable.logo),
                 contentDescription = "Mulai Sekarang",
                 modifier = Modifier.size(96.dp),
             )

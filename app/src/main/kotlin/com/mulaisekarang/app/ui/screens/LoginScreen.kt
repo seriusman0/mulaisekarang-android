@@ -88,7 +88,7 @@ fun LoginScreen(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_logo_mark),
+                    painter = painterResource(R.drawable.logo),
                     contentDescription = "Mulai Sekarang",
                     modifier = Modifier
                         .padding(20.dp)
