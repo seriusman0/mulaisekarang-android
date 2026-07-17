@@ -1,16 +1,22 @@
 package com.mulaisekarang.app.auth
 
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.ClearCredentialException
 import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.mulaisekarang.app.BuildConfig
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GoogleAuthClient(private val context: Context) {
+@Singleton
+class GoogleAuthClient @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val credentialManager = CredentialManager.create(context)
 
@@ -36,6 +42,15 @@ class GoogleAuthClient(private val context: Context) {
             Result.failure(e)
         } catch (e: GoogleIdTokenParsingException) {
             Result.failure(e)
+        }
+    }
+
+    /** Clears the Credential Manager's cached Google session so the account picker doesn't auto-pick a stale account on the next sign-in. */
+    suspend fun signOut() {
+        try {
+            credentialManager.clearCredentialState(ClearCredentialStateRequest())
+        } catch (e: ClearCredentialException) {
+            // best-effort cleanup; a failure here shouldn't block logout
         }
     }
 }

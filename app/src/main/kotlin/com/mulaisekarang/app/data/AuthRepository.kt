@@ -1,5 +1,6 @@
 package com.mulaisekarang.app.data
 
+import com.mulaisekarang.app.auth.GoogleAuthClient
 import com.mulaisekarang.app.data.model.ForgotPasswordRequest
 import com.mulaisekarang.app.data.model.GoogleLoginRequest
 import com.mulaisekarang.app.data.model.LoginRequest
@@ -18,6 +19,7 @@ import javax.inject.Inject
 class AuthRepository @Inject constructor(
     private val api: ApiService,
     private val tokenStore: TokenStore,
+    private val googleAuthClient: GoogleAuthClient,
 ) {
     val isLoggedIn get() = tokenStore.tokenFlow
 
@@ -88,6 +90,7 @@ class AuthRepository @Inject constructor(
 
     suspend fun logout() {
         runCatching { api.logout() }
+        googleAuthClient.signOut()
         tokenStore.clearToken()
     }
 
