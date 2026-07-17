@@ -7,6 +7,18 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics") apply false
+}
+
+// Crashlytics needs a real Firebase project's google-services.json (Firebase Console, same
+// GCP project as the Google Sign-In OAuth client — see README's Google Sign-In section) — an
+// external console step this repo can't automate, mirroring keystore.properties below. Both
+// plugins are applied only when that file exists so a fresh checkout still builds.
+val hasGoogleServices = rootProject.file("app/google-services.json").exists()
+if (hasGoogleServices) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 // Release signing credentials, kept out of the repo — see keystore.properties.example / README.md.
@@ -148,6 +160,11 @@ dependencies {
     implementation("androidx.paging:paging-compose:3.3.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    if (hasGoogleServices) {
+        implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+        implementation("com.google.firebase:firebase-crashlytics-ktx")
+    }
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
