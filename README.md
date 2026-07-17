@@ -48,7 +48,8 @@ See `store-assets/release-checklist.md` for the full Play Console submission che
 - **UI**: Jetpack Compose, single-activity, `navigation-compose` for screen routing (`ui/navigation/NavGraph.kt`).
 - **Networking**: Retrofit + OkHttp + kotlinx.serialization (`data/network/`). `AuthInterceptor` attaches the stored Bearer token to every request.
 - **Auth/session**: token persisted via Jetpack DataStore (`data/TokenStore.kt`).
-- **DI**: no framework — a single `AppContainer` (see `AppContainer.kt`) wires repositories/services, created once in `MainActivity` and threaded through the nav graph. ViewModels are created with a small `viewModelFactoryOf` helper (`ui/navigation/ViewModelFactory.kt`).
+- **DI**: Hilt (`di/NetworkModule.kt`, `di/DatabaseModule.kt` provide Retrofit/OkHttp/Room singletons; every screen's ViewModel is `@HiltViewModel` and obtained via `hiltViewModel()` in the nav graph).
+- **Offline cache**: Room (`data/local/`) is the source of truth for the default course catalog feed only (`CourseEntity`/`CourseDetailEntity`/`RemoteKeyEntity` via Paging3's `RemoteMediator`); every other screen is a thin, network-only pass-through to Retrofit.
 - **Cleartext HTTP**: only permitted to the dev server IP / emulator loopback, via the `debug`-only `network_security_config.xml`; the `release` variant has its own copy with no cleartext exceptions (production traffic is HTTPS-only).
 
 ## Google Sign-In

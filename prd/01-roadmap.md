@@ -9,17 +9,19 @@ Tag per item: `[Android]` hanya sisi Android, `[Backend-only]` hanya sisi Larave
 
 Semua Android-only, tanpa ketergantungan backend. Dikerjakan lebih dulu karena murah dan menurunkan risiko semua fase berikutnya.
 
-1. **Selesaikan diff belum-commit yang sedang berjalan** — icon rebrand (`drawable-nodpi/`, `mipmap-nodpi/`), `ProfileScreen.kt`, `GlassBottomNavBar.kt`, `LoginScreen.kt`/`SplashScreen.kt`. Putuskan & commit sebelum menyentuh file-file ini lagi untuk item 4 & 5 di bawah — dua di antaranya justru target P0 ini sendiri.
-2. **Perbaiki 5 silent-failure bug** (pola `.onSuccess{}` tanpa `.onFailure{}` sama sekali):
-   - `ChatConversationViewModel.sendMessage` (baris 80-84) — pesan gagal terkirim hilang tanpa jejak. Referensi pola yang benar ada di file yang sama: `refresh()` (baris 67-75).
-   - `LessonPlayerViewModel.markComplete` — kegagalan tandai-selesai tidak muncul ke user.
-   - `CourseDetailViewModel.checkPendingPayment` — kegagalan polling status pembayaran Xendit ditelan.
-   - `CourseDetailViewModel.startConversationWithMentor` — `.getOrNull()` menelan error, caller cuma dapat `null`.
-   - `MyCoursesViewModel` (recommended-courses fetch) — severity rendah, tetap perbaiki untuk konsistensi.
-3. **Tambahkan `GoogleAuthClient.signOut()`**/pembersihan credential-state, panggil dari `AuthRepository.logout()` — saat ini logout tidak membersihkan sesi Google, account picker bisa auto-pilih akun lama.
-4. **Perbaiki regresi ikon adaptif** (A1) — kembalikan `mipmap-anydpi-v26/ic_launcher.xml` + vector background/foreground, agar Android 13+ themed/monochrome icon tidak hilang.
-5. **Selesaikan status sistem Glass** (A2) — restorasi frosted-glass di `GlassBottomNavBar.kt` agar konsisten dengan `Glass.kt`/`GlassCard` yang masih dipakai di layar lain.
-6. **Tulis ulang bagian Arsitektur di `README.md`** — Hilt itu nyata dan dipakai (`di/NetworkModule.kt`, `di/DatabaseModule.kt`, `@HiltViewModel` di semua viewmodel); tidak ada `AppContainer.kt` di tree saat ini, klaim README sudah basi total.
+1. ✅ **Selesaikan diff belum-commit yang sedang berjalan** — icon rebrand (`drawable-nodpi/`, `mipmap-nodpi/`), `ProfileScreen.kt`, `GlassBottomNavBar.kt`, `LoginScreen.kt`/`SplashScreen.kt`. Dikonsolidasikan bareng item 4 & 5 di commit `P0.1/P0.4/P0.5`.
+2. ✅ **Perbaiki 5 silent-failure bug** (pola `.onSuccess{}` tanpa `.onFailure{}` sama sekali) — commit `P0.2`:
+   - `ChatConversationViewModel.sendMessage` — sekarang emit `sendError` SharedFlow -> snackbar di `ChatConversationScreen`.
+   - `LessonPlayerViewModel.markComplete` — `LessonPlayerEvent.Error` baru -> snackbar di `LessonPlayerScreen`.
+   - `CourseDetailViewModel.checkPendingPayment` — pakai ulang `CheckoutEvent.Error` yang sudah ada -> snackbar.
+   - `CourseDetailViewModel.startConversationWithMentor` — pakai ulang `CheckoutEvent.Error`, `onResult(null)` tetap dipanggil.
+   - `MyCoursesViewModel` (recommended-courses fetch) — no-op eksplisit + komentar (non-kritis, tidak boleh menimpa error utama).
+3. ✅ **Tambahkan `GoogleAuthClient.signOut()`**/pembersihan credential-state, panggil dari `AuthRepository.logout()` — commit `P0.3`.
+4. ✅ **Perbaiki regresi ikon adaptif** (A1) — `mipmap-anydpi-v26/ic_launcher.xml` + vector background + foreground (inset raster logo baru) + `monochrome` Android 13+, dikembalikan di commit `P0.1/P0.4/P0.5`.
+5. ✅ **Selesaikan status sistem Glass** (A2) — `GlassBottomNavBar.kt` kembali pakai `GlassBackground`, dikembalikan di commit `P0.1/P0.4/P0.5`.
+6. ✅ **Tulis ulang bagian Arsitektur di `README.md`** — commit `P0.6`, klaim `AppContainer` basi diganti deskripsi Hilt yang benar + catatan cakupan Room.
+
+**P0 selesai seluruhnya (2026-07-17).**
 
 ## P1 — Fondasi Produksi
 
