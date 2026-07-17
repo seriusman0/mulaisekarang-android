@@ -87,6 +87,19 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = false
+            all {
+                it.maxHeapSize = "2g"
+                it.testLogging {
+                    events("passed", "failed", "skipped")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -135,4 +148,12 @@ dependencies {
     implementation("androidx.paging:paging-compose:3.3.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("app.cash.turbine:turbine:1.1.0")
+    testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+
+    testImplementation("androidx.room:room-testing:2.6.1")
 }
