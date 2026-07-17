@@ -26,6 +26,7 @@ sealed interface LessonPlayerUiState {
 sealed interface LessonPlayerEvent {
     data class NavigateToLesson(val lessonId: Int) : LessonPlayerEvent
     data object CourseCompleted : LessonPlayerEvent
+    data class Error(val message: String) : LessonPlayerEvent
 }
 
 @HiltViewModel
@@ -73,6 +74,9 @@ class LessonPlayerViewModel @Inject constructor(
                     } else {
                         _events.emit(LessonPlayerEvent.CourseCompleted)
                     }
+                }
+                .onFailure { e ->
+                    _events.emit(LessonPlayerEvent.Error(e.message ?: "Gagal menandai pelajaran selesai."))
                 }
             _completing.update { false }
         }

@@ -17,12 +17,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,7 @@ fun LessonPlayerScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val completing by viewModel.completing.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.load()
@@ -54,6 +58,7 @@ fun LessonPlayerScreen(
             when (event) {
                 is LessonPlayerEvent.NavigateToLesson -> onNavigateToLesson(event.lessonId)
                 LessonPlayerEvent.CourseCompleted -> onCourseCompleted()
+                is LessonPlayerEvent.Error -> snackbarHostState.showSnackbar(event.message)
             }
         }
     }
@@ -69,6 +74,7 @@ fun LessonPlayerScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when (val state = uiState) {
             is LessonPlayerUiState.Loading -> LoadingState(modifier = Modifier.padding(padding))

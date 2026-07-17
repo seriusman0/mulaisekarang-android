@@ -43,6 +43,7 @@ class MyCoursesViewModel @Inject constructor(
 
             runCatching { courseRepository.courses(featured = true) }
                 .onSuccess { response -> _uiState.update { it.copy(recommended = response.data) } }
+                .onFailure { /* recommended courses are non-critical; keep list empty, don't disturb the main error state */ }
         }
     }
 }

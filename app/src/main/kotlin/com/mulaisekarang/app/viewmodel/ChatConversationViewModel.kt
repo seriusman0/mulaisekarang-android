@@ -10,8 +10,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -38,6 +41,9 @@ class ChatConversationViewModel @Inject constructor(
 
     private val _conversation = MutableStateFlow<Conversation?>(null)
     val conversation: StateFlow<Conversation?> = _conversation.asStateFlow()
+
+    private val _sendError = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val sendError: SharedFlow<String> = _sendError.asSharedFlow()
 
     private var pollingJob: Job? = null
     private var isSending = false
@@ -80,6 +86,7 @@ class ChatConversationViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.sendMessage(conversationId, body) }
                 .onSuccess { refresh() }
+                .onFailure { e -> _sendError.emit(e.message ?: "Pesan gagal terkirim.") }
             isSending = false
         }
     }

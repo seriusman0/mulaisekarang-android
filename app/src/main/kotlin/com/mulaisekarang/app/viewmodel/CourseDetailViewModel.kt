@@ -110,13 +110,20 @@ class CourseDetailViewModel @Inject constructor(
                         refresh()
                     }
                 }
+                .onFailure { e ->
+                    _checkoutEvent.emit(CheckoutEvent.Error(e.userMessage("Gagal memeriksa status pembayaran.")))
+                }
         }
     }
 
     fun startConversationWithMentor(username: String, onResult: (Conversation?) -> Unit) {
         viewModelScope.launch {
-            val conversation = runCatching { chatRepository.startConversation(username) }.getOrNull()
-            onResult(conversation)
+            runCatching { chatRepository.startConversation(username) }
+                .onSuccess { onResult(it) }
+                .onFailure { e ->
+                    onResult(null)
+                    _checkoutEvent.emit(CheckoutEvent.Error(e.userMessage("Gagal memulai percakapan dengan mentor.")))
+                }
         }
     }
 }
