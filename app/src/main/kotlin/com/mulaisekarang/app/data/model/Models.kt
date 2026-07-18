@@ -368,6 +368,34 @@ data class EnrollmentsResponse(
 )
 
 @Serializable
+data class OrderItem(
+    val id: Int,
+    val price: Double,
+    val quantity: Int = 1,
+    @SerialName("orderable_type") val orderableType: String? = null,
+    val course: Course? = null,
+)
+
+@Serializable
+data class Transaction(
+    val id: Int,
+    @SerialName("reference_id") val referenceId: String,
+    val amount: Double,
+    val status: String,
+    @SerialName("payment_channel") val paymentChannel: String? = null,
+    @SerialName("payment_method") val paymentMethod: String? = null,
+    @SerialName("paid_at") val paidAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("order_items") val orderItems: List<OrderItem> = emptyList(),
+)
+
+@Serializable
+data class TransactionsResponse(
+    val data: List<Transaction>,
+    val meta: PaginationMeta,
+)
+
+@Serializable
 data class Conversation(
     val id: Int,
     val type: String? = "mentor",

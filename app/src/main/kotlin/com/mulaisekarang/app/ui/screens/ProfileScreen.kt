@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -55,6 +56,7 @@ fun ProfileScreen(
     authViewModel: AuthViewModel,
     onLoggedOut: () -> Unit,
     onNavigateToMyCourses: () -> Unit,
+    onNavigateToTransactions: () -> Unit,
     onEditProfile: () -> Unit,
 ) {
     val uiState by authViewModel.uiState.collectAsState()
@@ -247,6 +249,60 @@ fun ProfileScreen(
                             )
                             Text(
                                 "Lanjutkan pembelajaran Anda",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF666666), // Charcoal-text
+                            )
+                        }
+                        Icon(
+                            Icons.Filled.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.outlineVariant,
+                        )
+                    }
+                }
+
+                // Menu list: "Riwayat Transaksi"
+                Surface(
+                    onClick = onNavigateToTransactions,
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Filled.Receipt,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 16.dp),
+                        ) {
+                            Text(
+                                "Riwayat Transaksi",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF111111) // Onyx-text
+                            )
+                            Text(
+                                "Lihat semua pembayaran Anda",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color(0xFF666666), // Charcoal-text
                             )

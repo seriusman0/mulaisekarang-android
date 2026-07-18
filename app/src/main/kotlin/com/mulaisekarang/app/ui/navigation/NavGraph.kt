@@ -43,6 +43,7 @@ import com.mulaisekarang.app.ui.screens.QuizScreen
 import com.mulaisekarang.app.ui.screens.RegisterScreen
 import com.mulaisekarang.app.ui.screens.ResetPasswordScreen
 import com.mulaisekarang.app.ui.screens.SplashScreen
+import com.mulaisekarang.app.ui.screens.TransactionHistoryScreen
 import com.mulaisekarang.app.viewmodel.AssignmentViewModel
 import com.mulaisekarang.app.viewmodel.AuthViewModel
 import com.mulaisekarang.app.viewmodel.ChatConversationViewModel
@@ -59,6 +60,7 @@ import com.mulaisekarang.app.viewmodel.NewGroupViewModel
 import com.mulaisekarang.app.viewmodel.PaymentSuccessViewModel
 import com.mulaisekarang.app.viewmodel.QuizViewModel
 import com.mulaisekarang.app.viewmodel.ResetPasswordViewModel
+import com.mulaisekarang.app.viewmodel.TransactionHistoryViewModel
 
 private object Routes {
     const val SPLASH = "splash"
@@ -74,6 +76,7 @@ private object Routes {
     const val NEW_GROUP = "new-group"
     const val PROFILE = "profile"
     const val EDIT_PROFILE = "edit-profile"
+    const val TRANSACTIONS = "transactions"
     const val COURSE_DETAIL = "course/{courseId}"
     const val LESSON_PLAYER = "course/{courseId}/lesson/{lessonId}"
     const val INSTRUCTOR_PROFILE = "instructor/{username}"
@@ -446,6 +449,7 @@ fun MulaiSekarangNavGraph(
                             restoreState = true
                         }
                     },
+                    onNavigateToTransactions = { navController.navigate(Routes.TRANSACTIONS) },
                     onEditProfile = { navController.navigate(Routes.EDIT_PROFILE) },
                 )
             }
@@ -456,6 +460,11 @@ fun MulaiSekarangNavGraph(
                     onSaved = { navController.popBackStack() },
                     onBack = { navController.popBackStack() },
                 )
+            }
+
+            composable(Routes.TRANSACTIONS) {
+                val transactionHistoryViewModel: TransactionHistoryViewModel = hiltViewModel()
+                TransactionHistoryScreen(viewModel = transactionHistoryViewModel)
             }
         }
     }

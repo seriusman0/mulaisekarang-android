@@ -38,7 +38,7 @@ Bagian terbesar. Disusun 2a (risiko desain rendah, mulai duluan/paralel) lalu 2b
 ### 2a
 
 1. ✅ `[Full-stack]` **Ganti kata sandi** — commit `P2a.1`. Backend: `PasswordController@update` baru (`PATCH /api/v1/profile/password`, gaya thin-controller `EnrollmentController.php`), validasi diport dari `PasswordSettings.php` (`current_password` + `Hash::check`, `new_password` min:8|confirmed). Android: `ApiService.changePassword` + `AuthRepository.changePassword` + `AuthViewModel.changePassword`/`ChangePasswordEvent` + form baru di `EditProfileScreen.kt`.
-2. `[Full-stack]` **Riwayat transaksi** — port query `OrderHistory.php` (`transactions()->with('orderItems.orderable')`) ke `Api/V1/TransactionController@index` baru + Resource, paginasi persis seperti `EnrollmentController.php` (bentuk `meta`: current_page/last_page/per_page/total). Android: layar baru dari `ProfileScreen.kt`.
+2. ✅ `[Full-stack]` **Riwayat transaksi** — commit `P2a.2`. Backend: `TransactionController@index` baru (`GET /api/v1/transactions`), `TransactionResource`/`OrderItemResource`, query diport dari `OrderHistory.php` (`transactions()->with('orderItems.orderable')`), paginasi meta sama seperti `EnrollmentController.php`. Android: `TransactionRepository` + `TransactionHistoryViewModel` + `TransactionHistoryScreen.kt` baru, entry point "Riwayat Transaksi" ditambahkan di `ProfileScreen.kt`.
 3. ✅ `[Android]` **Reviews-read** — commit `P2a.3`. Bagian "Ulasan" (rata-rata + jumlah + `ReviewCard` per ulasan) ditambahkan setelah daftar Materi di `CourseDetailScreen.kt`.
 
 ### 2b

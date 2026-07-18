@@ -32,6 +32,7 @@ import com.mulaisekarang.app.data.model.SendMessageRequest
 import com.mulaisekarang.app.data.model.SendMessageResponse
 import com.mulaisekarang.app.data.model.StartConversationRequest
 import com.mulaisekarang.app.data.model.SubmitQuizAnswersRequest
+import com.mulaisekarang.app.data.model.TransactionsResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Body
@@ -97,6 +98,9 @@ interface ApiService {
 
     @GET("my-courses")
     suspend fun myCourses(@Query("page") page: Int = 1): EnrollmentsResponse
+
+    @GET("transactions")
+    suspend fun transactions(@Query("page") page: Int = 1): TransactionsResponse
 
     @GET("dashboard/summary")
     suspend fun dashboardSummary(): DashboardSummaryResponse
