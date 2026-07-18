@@ -29,6 +29,12 @@ sealed interface ProfileUpdateEvent {
     data class Error(val message: String) : ProfileUpdateEvent
 }
 
+sealed interface ChangePasswordEvent {
+    data object Loading : ChangePasswordEvent
+    data object Success : ChangePasswordEvent
+    data class Error(val message: String) : ChangePasswordEvent
+}
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
@@ -37,6 +43,9 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
 
     private val _profileUpdateEvent = MutableSharedFlow<ProfileUpdateEvent>(extraBufferCapacity = 1)
     val profileUpdateEvent: SharedFlow<ProfileUpdateEvent> = _profileUpdateEvent
+
+    private val _changePasswordEvent = MutableSharedFlow<ChangePasswordEvent>(extraBufferCapacity = 1)
+    val changePasswordEvent: SharedFlow<ChangePasswordEvent> = _changePasswordEvent
 
     fun checkExistingSession() {
         viewModelScope.launch {
@@ -91,6 +100,17 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
                 }
                 .onFailure {
                     _profileUpdateEvent.emit(ProfileUpdateEvent.Error(it.userMessage("Gagal memperbarui profil.")))
+                }
+        }
+    }
+
+    fun changePassword(currentPassword: String, newPassword: String) {
+        viewModelScope.launch {
+            _changePasswordEvent.emit(ChangePasswordEvent.Loading)
+            runCatching { repository.changePassword(currentPassword, newPassword) }
+                .onSuccess { _changePasswordEvent.emit(ChangePasswordEvent.Success) }
+                .onFailure {
+                    _changePasswordEvent.emit(ChangePasswordEvent.Error(it.userMessage("Gagal mengubah password.")))
                 }
         }
     }

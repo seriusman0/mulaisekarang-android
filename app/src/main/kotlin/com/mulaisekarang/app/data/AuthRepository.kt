@@ -1,6 +1,7 @@
 package com.mulaisekarang.app.data
 
 import com.mulaisekarang.app.auth.GoogleAuthClient
+import com.mulaisekarang.app.data.model.ChangePasswordRequest
 import com.mulaisekarang.app.data.model.ForgotPasswordRequest
 import com.mulaisekarang.app.data.model.GoogleLoginRequest
 import com.mulaisekarang.app.data.model.LoginRequest
@@ -62,6 +63,9 @@ class AuthRepository @Inject constructor(
 
     suspend fun resetPassword(email: String, token: String, password: String): String =
         api.resetPassword(ResetPasswordRequest(email, token, password, password)).message
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): String =
+        api.changePassword(ChangePasswordRequest(currentPassword, newPassword, newPassword)).message
 
     suspend fun updateProfile(
         firstName: String,

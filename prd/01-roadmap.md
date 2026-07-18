@@ -25,9 +25,9 @@ Semua Android-only, tanpa ketergantungan backend. Dikerjakan lebih dulu karena m
 
 ## P1 — Fondasi Produksi
 
-1. `[Android]` Unit test ViewModel (repository-failure → error-state, langsung meng-cover regresi dari perbaikan P0.2), test DAO Room, beberapa Compose test untuk alur login/checkout.
-2. `[Android]` CI baru — `.github/workflows/`: lint + unit test + `assembleDebug` di setiap PR. (Backend sudah punya budaya test nyata — `tests/Feature`, `tests/Unit`, `tests/e2e`, `phpunit.xml`, `playwright.config.ts` — ini menyamakan sisi Android, bukan memperkenalkan praktik baru ke proyek.)
-3. `[Android]` Crash reporting minimum viable — Firebase Crashlytics (A3).
+1. ✅ (sebagian) `[Android]` Unit test ViewModel — commit `P1.1`, 5 test meng-cover tepat jalur repository-failure → error-state yang diperbaiki P0.2 (`ChatConversationViewModel`, `LessonPlayerViewModel`, `MyCoursesViewModel`). Test DAO Room & Compose test **ditunda** — keduanya butuh `androidTest` di device/emulator fisik, tidak tersedia di lingkungan eksekusi sesi ini (`adb devices` kosong). Jalankan `./gradlew :app:testDebugUnitTest`.
+2. ✅ `[Android]` CI baru — commit `P1.2`, `.github/workflows/android-ci.yml`: `lintDebug` + `testDebugUnitTest` + `assembleDebug` di setiap PR/push ke `main`. Menjalankan `lintDebug` lokal untuk validasi menemukan 1 error nyata pra-eksisting (`VideoPlayer.kt` pakai API `UnstableApi` Media3 tanpa opt-in) — sudah diperbaiki di commit yang sama.
+3. 🟡 (scaffolding selesai, blocked on Firebase Console) `[Android]` Crash reporting minimum viable — Firebase Crashlytics (A3), commit `P1.3`. Plugin + dependency terpasang, aktif hanya jika `app/google-services.json` ada (pola sama seperti `keystore.properties`) — file itu sendiri perlu dibuat manual di Firebase Console (project GCP yang sama dengan OAuth Google Sign-In), baru lanjut wiring `Application.onCreate()` + uncaught-exception handler.
 4. `[Backend-only]` Ganti `MAIL_MAILER=log` ke pengiriman email nyata (SMTP/Postmark/SES) — **prioritas tertinggi** di seluruh audit: alur lupa-password/reset-password sudah lengkap di UI Android (`ForgotPasswordScreen`/`ResetPasswordScreen`) tapi diam-diam tidak berfungsi di lingkungan nyata manapun hari ini.
 5. `[Backend-only]` Pastikan/deploy route privacy-policy live (`release-checklist.md` sudah menandai ini belum dikonfirmasi) — `resources/views/public/privacy-policy.blade.php` + route baru di `routes/web.php`.
 
@@ -37,9 +37,9 @@ Bagian terbesar. Disusun 2a (risiko desain rendah, mulai duluan/paralel) lalu 2b
 
 ### 2a
 
-1. `[Full-stack]` **Ganti kata sandi** — port aturan validasi dari `app/Livewire/Dashboard/PasswordSettings.php` ke endpoint baru `Api/V1` (mis. `PATCH /api/v1/profile/password`), ikuti pola thin-controller+Resource `EnrollmentController.php`. Android: perluas `EditProfileScreen.kt` + `AuthRepository` + `ApiService`.
+1. ✅ `[Full-stack]` **Ganti kata sandi** — commit `P2a.1`. Backend: `PasswordController@update` baru (`PATCH /api/v1/profile/password`, gaya thin-controller `EnrollmentController.php`), validasi diport dari `PasswordSettings.php` (`current_password` + `Hash::check`, `new_password` min:8|confirmed). Android: `ApiService.changePassword` + `AuthRepository.changePassword` + `AuthViewModel.changePassword`/`ChangePasswordEvent` + form baru di `EditProfileScreen.kt`.
 2. `[Full-stack]` **Riwayat transaksi** — port query `OrderHistory.php` (`transactions()->with('orderItems.orderable')`) ke `Api/V1/TransactionController@index` baru + Resource, paginasi persis seperti `EnrollmentController.php` (bentuk `meta`: current_page/last_page/per_page/total). Android: layar baru dari `ProfileScreen.kt`.
-3. `[Android]` **Reviews-read** — render `course.reviews`/`reviewsAvgRating` (sudah di-deserialize di `Models.kt:99-133`, sudah di-cache via `CourseDetailEntity`, sudah dikembalikan backend via `CourseController@show`'s `->load(['reviews.user'])->loadAvg(...)`) di `CourseDetailScreen.kt` — dikonfirmasi langsung: layar saat ini lompat dari deskripsi ke jumlah pelajaran lalu langsung ke daftar Materi, nol bagian review. Tanpa dependency backend — kerjakan lebih dulu di P2.
+3. ✅ `[Android]` **Reviews-read** — commit `P2a.3`. Bagian "Ulasan" (rata-rata + jumlah + `ReviewCard` per ulasan) ditambahkan setelah daftar Materi di `CourseDetailScreen.kt`.
 
 ### 2b
 

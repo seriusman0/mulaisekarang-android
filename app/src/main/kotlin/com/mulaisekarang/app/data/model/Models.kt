@@ -330,6 +330,13 @@ data class ResetPasswordRequest(
 )
 
 @Serializable
+data class ChangePasswordRequest(
+    @SerialName("current_password") val currentPassword: String,
+    @SerialName("new_password") val newPassword: String,
+    @SerialName("new_password_confirmation") val newPasswordConfirmation: String,
+)
+
+@Serializable
 data class GoogleLoginRequest(
     @SerialName("id_token") val idToken: String,
 )

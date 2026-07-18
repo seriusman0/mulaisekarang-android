@@ -4,6 +4,7 @@ import com.mulaisekarang.app.data.model.AssignmentDetailResponse
 import com.mulaisekarang.app.data.model.AssignmentSubmissionResponse
 import com.mulaisekarang.app.data.model.AuthResponse
 import com.mulaisekarang.app.data.model.CategoriesResponse
+import com.mulaisekarang.app.data.model.ChangePasswordRequest
 import com.mulaisekarang.app.data.model.CheckoutResponse
 import com.mulaisekarang.app.data.model.ConversationResponse
 import com.mulaisekarang.app.data.model.ConversationsResponse
@@ -36,6 +37,7 @@ import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.PartMap
@@ -71,6 +73,9 @@ interface ApiService {
         @PartMap fields: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part photo: MultipartBody.Part?,
     ): MeResponse
+
+    @PATCH("profile/password")
+    suspend fun changePassword(@Body body: ChangePasswordRequest): MessageResponse
 
     @GET("courses")
     suspend fun courses(

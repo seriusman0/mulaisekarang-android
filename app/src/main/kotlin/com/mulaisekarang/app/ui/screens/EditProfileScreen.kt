@@ -48,10 +48,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mulaisekarang.app.viewmodel.AuthUiState
 import com.mulaisekarang.app.viewmodel.AuthViewModel
+import com.mulaisekarang.app.viewmodel.ChangePasswordEvent
 import com.mulaisekarang.app.viewmodel.ProfileUpdateEvent
 import java.io.File
 import java.io.FileOutputStream
@@ -77,6 +79,11 @@ fun EditProfileScreen(
     var bio by remember(user) { mutableStateOf(user?.bio ?: "") }
     var pickedPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
+    var isChangingPassword by remember { mutableStateOf(false) }
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) { uri -> if (uri != null) pickedPhotoUri = uri }
@@ -91,6 +98,25 @@ fun EditProfileScreen(
                 }
                 is ProfileUpdateEvent.Error -> {
                     isSaving = false
+                    coroutineScope.launch { snackbarHostState.showSnackbar(event.message) }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        authViewModel.changePasswordEvent.collect { event ->
+            when (event) {
+                is ChangePasswordEvent.Loading -> isChangingPassword = true
+                is ChangePasswordEvent.Success -> {
+                    isChangingPassword = false
+                    currentPassword = ""
+                    newPassword = ""
+                    confirmPassword = ""
+                    coroutineScope.launch { snackbarHostState.showSnackbar("Password berhasil diubah.") }
+                }
+                is ChangePasswordEvent.Error -> {
+                    isChangingPassword = false
                     coroutineScope.launch { snackbarHostState.showSnackbar(event.message) }
                 }
             }
@@ -245,6 +271,68 @@ fun EditProfileScreen(
                             CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                         } else {
                             Text("Simpan")
+                        }
+                    }
+
+                    Text(
+                        "Ganti Password",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 32.dp),
+                    )
+                    OutlinedTextField(
+                        value = currentPassword,
+                        onValueChange = { currentPassword = it },
+                        label = { Text("Password Saat Ini") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                    )
+                    OutlinedTextField(
+                        value = newPassword,
+                        onValueChange = { newPassword = it },
+                        label = { Text("Password Baru") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                    )
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it },
+                        label = { Text("Konfirmasi Password Baru") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                    )
+
+                    Button(
+                        onClick = {
+                            authViewModel.changePassword(currentPassword, newPassword)
+                        },
+                        enabled = !isChangingPassword &&
+                            currentPassword.isNotBlank() &&
+                            newPassword.length >= 8 &&
+                            newPassword == confirmPassword,
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp),
+                    ) {
+                        if (isChangingPassword) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        } else {
+                            Text("Ubah Password")
                         }
                     }
                 }
