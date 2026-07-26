@@ -1,0 +1,13 @@
+# Maestro configuration for the Mulai Sekarang E2E suite.
+# Run: maestro test .maestro
+#
+# Requires seeded accounts reachable by the app's BuildConfig.BASE_URL:
+#   student    — siswa1@mulaisekarang.com / password
+#   instructor — budi@mulaisekarang.com / password
+#
+# Compose testTags are exposed as Android resource-ids (testTagsAsResourceId in
+# MainActivity), so `id:` selectors below match Compose Modifier.testTag(...).
+appId: com.mulaisekarang.app
+---
+- runFlow: flows/student-smoke.yaml
+- runFlow: flows/instructor-smoke.yaml

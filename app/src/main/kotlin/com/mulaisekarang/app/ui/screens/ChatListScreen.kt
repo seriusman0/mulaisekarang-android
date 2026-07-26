@@ -80,11 +80,6 @@ fun ChatListScreen(
                 contentPadding = PaddingValues(vertical = 8.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                item {
-                    AiTutorRow(onClick = { viewModel.openAiTutor() })
-                    HorizontalDivider()
-                }
-
                 when {
                     uiState.error != null -> item {
                         ErrorState(
@@ -107,29 +102,6 @@ fun ChatListScreen(
             }
         }
     }
-}
-
-@Composable
-private fun AiTutorRow(onClick: () -> Unit) {
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onClick),
-        leadingContent = {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
-            }
-        },
-        headlineContent = { Text("AI Tutor", fontWeight = FontWeight.Bold) },
-        supportingContent = { Text("Tanya apa saja, respon instan") },
-    )
 }
 
 @Composable

@@ -1,0 +1,27 @@
+appId: com.mulaisekarang.app
+name: Student opens the notifications inbox
+---
+- runFlow: student-login.yaml
+- tapOn:
+    id: "nav_tab_akun"
+- scrollUntilVisible:
+    element:
+      id: "menu_notifications"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "menu_notifications"
+- assertVisible:
+    text: "Notifikasi"
+- assertVisible:
+    id: "notifications_unread_filter"
+- runFlow:
+    when:
+      visible:
+        id: "notification_row"
+    commands:
+      # Marking everything read must drive the unread count to zero.
+      - tapOn:
+          id: "notifications_mark_all"
+      - assertVisible:
+          text: "Belum dibaca (0)"

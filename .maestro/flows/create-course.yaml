@@ -1,0 +1,27 @@
+appId: com.mulaisekarang.app
+name: Instructor creates a course
+---
+- runFlow: login.yaml
+- runFlow: open-portal.yaml
+- tapOn:
+    id: "nav_courses"
+- assertVisible:
+    id: "create_course_button"
+- tapOn:
+    id: "create_course_button"
+- assertVisible:
+    id: "course_title_input"
+- tapOn:
+    id: "course_title_input"
+- inputText: "Maestro E2E Course"
+- tapOn:
+    id: "course_price_input"
+- inputText: "150000"
+- hideKeyboard
+- tapOn:
+    id: "status_published"
+- tapOn:
+    id: "course_save_button"
+# Back on the course list; the new course appears.
+- assertVisible:
+    text: "Maestro E2E Course"

@@ -1,0 +1,15 @@
+appId: com.mulaisekarang.app
+name: Student browses the catalogue and opens a course
+---
+- runFlow: student-login.yaml
+# Home renders the catalogue feed.
+- assertVisible:
+    id: "course_card"
+- tapOn:
+    id: "course_card"
+# Course detail shows either a purchase path (not enrolled) or the curriculum
+# (already enrolled). Both prove the detail endpoint round-tripped.
+- assertVisible:
+    text: "Detail Course"
+- assertVisible:
+    text: "Materi"

@@ -1,0 +1,19 @@
+appId: com.mulaisekarang.app
+name: Login as student (subscriber)
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "email_input"
+- tapOn:
+    id: "email_input"
+- inputText: "siswa1@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "password"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+# Landed on Beranda (home) after successful login.
+- assertVisible:
+    text: "BERANDA"

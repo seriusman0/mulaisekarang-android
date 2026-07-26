@@ -55,6 +55,7 @@ import com.mulaisekarang.app.viewmodel.ChatConversationViewModel
 fun ChatConversationScreen(
     viewModel: ChatConversationViewModel,
     onBack: () -> Unit,
+    onChatPaywall: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val conversation by viewModel.conversation.collectAsState()
@@ -80,6 +81,11 @@ fun ChatConversationScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.sendError.collect { message -> snackbarHostState.showSnackbar(message) }
+    }
+
+    LaunchedEffect(viewModel) {
+        // The add-on lapsed mid-thread: send the student to the upsell.
+        viewModel.paywallRequired.collect { onChatPaywall() }
     }
 
     Scaffold(

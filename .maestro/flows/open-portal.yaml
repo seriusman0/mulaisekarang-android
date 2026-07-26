@@ -1,0 +1,11 @@
+appId: com.mulaisekarang.app
+name: Open instructor portal from profile
+---
+- tapOn:
+    text: "AKUN"
+- assertVisible:
+    id: "instructor_portal_entry"
+- tapOn:
+    id: "instructor_portal_entry"
+- assertVisible:
+    id: "wallet_balance"

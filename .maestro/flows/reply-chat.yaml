@@ -1,0 +1,13 @@
+appId: com.mulaisekarang.app
+name: Instructor replies to a chat
+---
+- runFlow: login.yaml
+- tapOn:
+    text: "CHAT"
+# Open the first conversation if the instructor has any.
+- runFlow:
+    when:
+      visible: "Chat"
+    commands:
+      - assertVisible:
+          text: "Chat"

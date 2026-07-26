@@ -1,6 +1,8 @@
 package com.mulaisekarang.app.ui.navigation
 
+import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -23,12 +25,19 @@ import androidx.navigation.navArgument
 import com.mulaisekarang.app.data.network.SESSION_EXPIRED_MESSAGE
 import com.mulaisekarang.app.data.network.SessionEventBus
 import com.mulaisekarang.app.ui.components.GlassBottomNavBar
+import com.mulaisekarang.app.ui.screens.CartScreen
 import com.mulaisekarang.app.ui.screens.ChatConversationScreen
 import com.mulaisekarang.app.ui.screens.ChatListScreen
 import com.mulaisekarang.app.ui.screens.AssignmentScreen
+import com.mulaisekarang.app.ui.screens.ChatPaywallScreen
 import com.mulaisekarang.app.ui.screens.CheckoutSummaryScreen
 import com.mulaisekarang.app.ui.screens.CourseDetailScreen
+import com.mulaisekarang.app.ui.screens.CourseEditorScreen
 import com.mulaisekarang.app.ui.screens.EditProfileScreen
+import com.mulaisekarang.app.ui.screens.InstructorCoursesScreen
+import com.mulaisekarang.app.ui.screens.InstructorDashboardScreen
+import com.mulaisekarang.app.ui.screens.InstructorGradingScreen
+import com.mulaisekarang.app.ui.screens.InstructorWalletScreen
 import com.mulaisekarang.app.ui.screens.ForgotPasswordScreen
 import com.mulaisekarang.app.ui.screens.HomeScreen
 import com.mulaisekarang.app.ui.screens.InstructorProfileScreen
@@ -36,30 +45,45 @@ import com.mulaisekarang.app.ui.screens.LessonPlayerScreen
 import com.mulaisekarang.app.ui.screens.LoginScreen
 import com.mulaisekarang.app.ui.screens.MarketplaceScreen
 import com.mulaisekarang.app.ui.screens.MyCoursesScreen
+import com.mulaisekarang.app.ui.screens.MyReviewsScreen
 import com.mulaisekarang.app.ui.screens.NewGroupScreen
+import com.mulaisekarang.app.ui.screens.NotificationsScreen
 import com.mulaisekarang.app.ui.screens.PaymentSuccessScreen
 import com.mulaisekarang.app.ui.screens.ProfileScreen
+import com.mulaisekarang.app.ui.screens.QuizAttemptHistoryScreen
 import com.mulaisekarang.app.ui.screens.QuizScreen
 import com.mulaisekarang.app.ui.screens.RegisterScreen
 import com.mulaisekarang.app.ui.screens.ResetPasswordScreen
 import com.mulaisekarang.app.ui.screens.SplashScreen
+import com.mulaisekarang.app.ui.screens.SubmissionHistoryScreen
 import com.mulaisekarang.app.ui.screens.TransactionHistoryScreen
 import com.mulaisekarang.app.viewmodel.AssignmentViewModel
 import com.mulaisekarang.app.viewmodel.AuthViewModel
+import com.mulaisekarang.app.viewmodel.CartViewModel
 import com.mulaisekarang.app.viewmodel.ChatConversationViewModel
 import com.mulaisekarang.app.viewmodel.ChatListViewModel
+import com.mulaisekarang.app.viewmodel.ChatPaywallViewModel
 import com.mulaisekarang.app.viewmodel.CourseDetailViewModel
+import com.mulaisekarang.app.viewmodel.CourseEditorViewModel
 import com.mulaisekarang.app.viewmodel.ForgotPasswordViewModel
+import com.mulaisekarang.app.viewmodel.InstructorCoursesViewModel
+import com.mulaisekarang.app.viewmodel.InstructorDashboardViewModel
+import com.mulaisekarang.app.viewmodel.InstructorGradingViewModel
+import com.mulaisekarang.app.viewmodel.InstructorWalletViewModel
 import com.mulaisekarang.app.viewmodel.HomeViewModel
 import com.mulaisekarang.app.viewmodel.InstructorProfileViewModel
 import com.mulaisekarang.app.viewmodel.LessonPlayerEvent
 import com.mulaisekarang.app.viewmodel.LessonPlayerViewModel
 import com.mulaisekarang.app.viewmodel.MarketplaceViewModel
 import com.mulaisekarang.app.viewmodel.MyCoursesViewModel
+import com.mulaisekarang.app.viewmodel.MyReviewsViewModel
 import com.mulaisekarang.app.viewmodel.NewGroupViewModel
+import com.mulaisekarang.app.viewmodel.NotificationsViewModel
 import com.mulaisekarang.app.viewmodel.PaymentSuccessViewModel
+import com.mulaisekarang.app.viewmodel.QuizAttemptHistoryViewModel
 import com.mulaisekarang.app.viewmodel.QuizViewModel
 import com.mulaisekarang.app.viewmodel.ResetPasswordViewModel
+import com.mulaisekarang.app.viewmodel.SubmissionHistoryViewModel
 import com.mulaisekarang.app.viewmodel.TransactionHistoryViewModel
 
 private object Routes {
@@ -77,6 +101,12 @@ private object Routes {
     const val PROFILE = "profile"
     const val EDIT_PROFILE = "edit-profile"
     const val TRANSACTIONS = "transactions"
+    const val CART = "cart"
+    const val NOTIFICATIONS = "notifications"
+    const val MY_REVIEWS = "my-reviews"
+    const val QUIZ_HISTORY = "quiz-attempts"
+    const val SUBMISSION_HISTORY = "assignment-submissions"
+    const val CHAT_PAYWALL = "chat-paywall"
     const val COURSE_DETAIL = "course/{courseId}"
     const val LESSON_PLAYER = "course/{courseId}/lesson/{lessonId}"
     const val INSTRUCTOR_PROFILE = "instructor/{username}"
@@ -84,6 +114,14 @@ private object Routes {
     const val ASSIGNMENT = "assignment/{assignmentId}"
     const val CHECKOUT_SUMMARY = "course/{courseId}/checkout"
     const val PAYMENT_SUCCESS = "payment-success/{referenceId}"
+
+    // Instructor portal
+    const val INSTRUCTOR_DASHBOARD = "instructor-portal"
+    const val INSTRUCTOR_COURSES = "instructor-portal/courses"
+    const val INSTRUCTOR_COURSE_CREATE = "instructor-portal/courses/create"
+    const val INSTRUCTOR_COURSE_EDIT = "instructor-portal/courses/{courseId}/edit"
+    const val INSTRUCTOR_WALLET = "instructor-portal/wallet"
+    const val INSTRUCTOR_GRADING = "instructor-portal/grading"
 
     fun chatConversation(id: Int) = "chat/$id"
     fun courseDetail(id: Int) = "course/$id"
@@ -94,6 +132,7 @@ private object Routes {
     fun lessonPlayer(courseId: Int, lessonId: Int) = "course/$courseId/lesson/$lessonId"
     fun checkoutSummary(courseId: Int) = "course/$courseId/checkout"
     fun paymentSuccess(referenceId: String) = "payment-success/${android.net.Uri.encode(referenceId)}"
+    fun instructorCourseEdit(courseId: Int) = "instructor-portal/courses/$courseId/edit"
 
     val BOTTOM_NAV_ROUTES = setOf(HOME, MARKETPLACE, MY_COURSES, CHAT_LIST, PROFILE, COURSE_DETAIL)
 }
@@ -300,6 +339,7 @@ fun MulaiSekarangNavGraph(
                 ChatConversationScreen(
                     viewModel = chatConversationViewModel,
                     onBack = { navController.popBackStack() },
+                    onChatPaywall = { navController.navigate(Routes.CHAT_PAYWALL) },
                 )
             }
 
@@ -334,6 +374,67 @@ fun MulaiSekarangNavGraph(
                     onQuizClick = { quizId -> navController.navigate(Routes.quiz(quizId)) },
                     onAssignmentClick = { assignmentId -> navController.navigate(Routes.assignment(assignmentId)) },
                     onBuyNow = { id -> navController.navigate(Routes.checkoutSummary(id)) },
+                    onOpenCart = { navController.navigate(Routes.CART) },
+                    onChatPaywall = { navController.navigate(Routes.CHAT_PAYWALL) },
+                )
+            }
+
+            composable(Routes.CART) {
+                val vm: CartViewModel = hiltViewModel()
+                val context = LocalContext.current
+                CartScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onOpenInvoice = { url ->
+                        CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(url))
+                    },
+                    onEnrolled = { navController.navigate(Routes.MY_COURSES) },
+                )
+            }
+
+            composable(Routes.CHAT_PAYWALL) {
+                val vm: ChatPaywallViewModel = hiltViewModel()
+                val context = LocalContext.current
+                ChatPaywallScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onOpenInvoice = { url ->
+                        CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(url))
+                    },
+                )
+            }
+
+            composable(Routes.NOTIFICATIONS) {
+                val vm: NotificationsViewModel = hiltViewModel()
+                NotificationsScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onOpenCourse = { id -> navController.navigate(Routes.courseDetail(id)) },
+                )
+            }
+
+            composable(Routes.MY_REVIEWS) {
+                val vm: MyReviewsViewModel = hiltViewModel()
+                MyReviewsScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onOpenCourse = { id -> navController.navigate(Routes.courseDetail(id)) },
+                )
+            }
+
+            composable(Routes.QUIZ_HISTORY) {
+                val vm: QuizAttemptHistoryViewModel = hiltViewModel()
+                QuizAttemptHistoryScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            composable(Routes.SUBMISSION_HISTORY) {
+                val vm: SubmissionHistoryViewModel = hiltViewModel()
+                SubmissionHistoryScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
                 )
             }
 
@@ -451,7 +552,83 @@ fun MulaiSekarangNavGraph(
                     },
                     onNavigateToTransactions = { navController.navigate(Routes.TRANSACTIONS) },
                     onEditProfile = { navController.navigate(Routes.EDIT_PROFILE) },
+                    onOpenInstructorPortal = { navController.navigate(Routes.INSTRUCTOR_DASHBOARD) },
+                    onNavigateToNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
+                    onNavigateToMyReviews = { navController.navigate(Routes.MY_REVIEWS) },
+                    onNavigateToQuizHistory = { navController.navigate(Routes.QUIZ_HISTORY) },
+                    onNavigateToSubmissionHistory = { navController.navigate(Routes.SUBMISSION_HISTORY) },
+                    onNavigateToCart = { navController.navigate(Routes.CART) },
+                    onNavigateToChatSubscription = { navController.navigate(Routes.CHAT_PAYWALL) },
                 )
+            }
+
+            composable(Routes.INSTRUCTOR_DASHBOARD) {
+                val vm: InstructorDashboardViewModel = hiltViewModel()
+                InstructorDashboardScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onCourses = { navController.navigate(Routes.INSTRUCTOR_COURSES) },
+                    onWallet = { navController.navigate(Routes.INSTRUCTOR_WALLET) },
+                    onGrading = { navController.navigate(Routes.INSTRUCTOR_GRADING) },
+                    onChat = {
+                        navController.navigate(Routes.CHAT_LIST) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
+            }
+
+            composable(Routes.INSTRUCTOR_COURSES) {
+                val vm: InstructorCoursesViewModel = hiltViewModel()
+                DisposableEffect(it) {
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_RESUME) vm.load()
+                    }
+                    it.lifecycle.addObserver(observer)
+                    onDispose { it.lifecycle.removeObserver(observer) }
+                }
+                InstructorCoursesScreen(
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onCreate = { navController.navigate(Routes.INSTRUCTOR_COURSE_CREATE) },
+                    onEdit = { id -> navController.navigate(Routes.instructorCourseEdit(id)) },
+                )
+            }
+
+            composable(Routes.INSTRUCTOR_COURSE_CREATE) {
+                val vm: CourseEditorViewModel = hiltViewModel()
+                CourseEditorScreen(
+                    viewModel = vm,
+                    courseId = null,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
+            }
+
+            composable(
+                Routes.INSTRUCTOR_COURSE_EDIT,
+                arguments = listOf(navArgument("courseId") { type = NavType.IntType }),
+            ) { backStack ->
+                val editCourseId = backStack.arguments?.getInt("courseId") ?: return@composable
+                val vm: CourseEditorViewModel = hiltViewModel()
+                CourseEditorScreen(
+                    viewModel = vm,
+                    courseId = editCourseId,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
+                )
+            }
+
+            composable(Routes.INSTRUCTOR_WALLET) {
+                val vm: InstructorWalletViewModel = hiltViewModel()
+                InstructorWalletScreen(viewModel = vm, onBack = { navController.popBackStack() })
+            }
+
+            composable(Routes.INSTRUCTOR_GRADING) {
+                val vm: InstructorGradingViewModel = hiltViewModel()
+                InstructorGradingScreen(viewModel = vm, onBack = { navController.popBackStack() })
             }
 
             composable(Routes.EDIT_PROFILE) {

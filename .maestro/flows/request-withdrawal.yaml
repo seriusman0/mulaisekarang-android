@@ -1,0 +1,25 @@
+appId: com.mulaisekarang.app
+name: Instructor requests a withdrawal
+---
+- runFlow: login.yaml
+- runFlow: open-portal.yaml
+- tapOn:
+    id: "nav_wallet"
+- assertVisible:
+    id: "withdrawal_amount_input"
+- tapOn:
+    id: "withdrawal_amount_input"
+- inputText: "100000"
+- tapOn:
+    id: "withdrawal_account_name"
+- inputText: "Budi Instruktur"
+- tapOn:
+    id: "withdrawal_account_number"
+- inputText: "1234567890"
+- hideKeyboard
+- tapOn:
+    id: "withdrawal_submit"
+# Server returns either a success confirmation or a balance validation error;
+# both are acceptable proof the request round-tripped.
+- assertVisible:
+    text: "penarikan"

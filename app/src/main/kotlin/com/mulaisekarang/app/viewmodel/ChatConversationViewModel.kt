@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.ChatRepository
 import com.mulaisekarang.app.data.model.ChatMessage
 import com.mulaisekarang.app.data.model.Conversation
+import com.mulaisekarang.app.data.network.isChatPaywall
+import com.mulaisekarang.app.data.network.userMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -44,6 +46,9 @@ class ChatConversationViewModel @Inject constructor(
 
     private val _sendError = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val sendError: SharedFlow<String> = _sendError.asSharedFlow()
+
+    private val _paywallRequired = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val paywallRequired: SharedFlow<Unit> = _paywallRequired.asSharedFlow()
 
     private var pollingJob: Job? = null
     private var isSending = false
@@ -86,7 +91,15 @@ class ChatConversationViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.sendMessage(conversationId, body) }
                 .onSuccess { refresh() }
-                .onFailure { e -> _sendError.emit(e.message ?: "Pesan gagal terkirim.") }
+                .onFailure { e ->
+                    // An expired add-on is not a transient send failure — send
+                    // the student to the paywall rather than a retry snackbar.
+                    if (e.isChatPaywall()) {
+                        _paywallRequired.emit(Unit)
+                    } else {
+                        _sendError.emit(e.userMessage("Pesan gagal terkirim."))
+                    }
+                }
             isSending = false
         }
     }

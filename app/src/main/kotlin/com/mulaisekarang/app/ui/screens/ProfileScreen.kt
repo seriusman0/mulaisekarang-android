@@ -17,12 +17,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +65,13 @@ fun ProfileScreen(
     onNavigateToMyCourses: () -> Unit,
     onNavigateToTransactions: () -> Unit,
     onEditProfile: () -> Unit,
+    onOpenInstructorPortal: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
+    onNavigateToMyReviews: () -> Unit = {},
+    onNavigateToQuizHistory: () -> Unit = {},
+    onNavigateToSubmissionHistory: () -> Unit = {},
+    onNavigateToCart: () -> Unit = {},
+    onNavigateToChatSubscription: () -> Unit = {},
 ) {
     val uiState by authViewModel.uiState.collectAsState()
 
@@ -209,6 +223,49 @@ fun ProfileScreen(
                     modifier = Modifier.padding(top = 24.dp, bottom = 12.dp, start = 4.dp),
                 )
 
+                // Instructor portal entry — only for tutor_instructor accounts.
+                if (user.role == "tutor_instructor") {
+                    Surface(
+                        onClick = onOpenInstructorPortal,
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                            .testTag("instructor_portal_entry"),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(Icons.Filled.School, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            }
+                            Column(modifier = Modifier.weight(1f).padding(horizontal = 16.dp)) {
+                                Text(
+                                    "Portal Instruktur",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF111111),
+                                )
+                                Text(
+                                    "Kelola kelas, penilaian, & pendapatan",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF666666),
+                                )
+                            }
+                            Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outlineVariant)
+                        }
+                    }
+                }
+
                 // Menu list: "Kursus Saya"
                 Surface(
                     onClick = onNavigateToMyCourses,
@@ -261,59 +318,56 @@ fun ProfileScreen(
                     }
                 }
 
-                // Menu list: "Riwayat Transaksi"
-                Surface(
+                // Student menu. Every row maps to one /api/v1 student feature.
+                ProfileMenuRow(
+                    icon = Icons.Filled.Receipt,
+                    title = "Riwayat Transaksi",
+                    subtitle = "Lihat semua pembayaran Anda",
                     onClick = onNavigateToTransactions,
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                Icons.Filled.Receipt,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 16.dp),
-                        ) {
-                            Text(
-                                "Riwayat Transaksi",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF111111) // Onyx-text
-                            )
-                            Text(
-                                "Lihat semua pembayaran Anda",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF666666), // Charcoal-text
-                            )
-                        }
-                        Icon(
-                            Icons.Filled.ChevronRight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.outlineVariant,
-                        )
-                    }
-                }
+                    testTag = "menu_transactions",
+                )
+                ProfileMenuRow(
+                    icon = Icons.Filled.ShoppingCart,
+                    title = "Keranjang",
+                    subtitle = "Beli beberapa kelas sekaligus",
+                    onClick = onNavigateToCart,
+                    testTag = "menu_cart",
+                )
+                ProfileMenuRow(
+                    icon = Icons.Filled.Notifications,
+                    title = "Notifikasi",
+                    subtitle = "Pengumuman, nilai tugas, status pembayaran",
+                    onClick = onNavigateToNotifications,
+                    testTag = "menu_notifications",
+                )
+                ProfileMenuRow(
+                    icon = Icons.Filled.Star,
+                    title = "Ulasan Saya",
+                    subtitle = "Ulasan yang pernah Anda tulis",
+                    onClick = onNavigateToMyReviews,
+                    testTag = "menu_my_reviews",
+                )
+                ProfileMenuRow(
+                    icon = Icons.Filled.Quiz,
+                    title = "Riwayat Kuis",
+                    subtitle = "Nilai dan pembahasan percobaan kuis",
+                    onClick = onNavigateToQuizHistory,
+                    testTag = "menu_quiz_history",
+                )
+                ProfileMenuRow(
+                    icon = Icons.Filled.Assignment,
+                    title = "Riwayat Tugas",
+                    subtitle = "Tugas yang Anda kumpulkan",
+                    onClick = onNavigateToSubmissionHistory,
+                    testTag = "menu_submission_history",
+                )
+                ProfileMenuRow(
+                    icon = Icons.AutoMirrored.Filled.Chat,
+                    title = "Langganan Chat",
+                    subtitle = "Status add-on chat mentor",
+                    onClick = onNavigateToChatSubscription,
+                    testTag = "menu_chat_subscription",
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -339,3 +393,62 @@ fun ProfileScreen(
     }
 }
 
+
+@Composable
+private fun ProfileMenuRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    testTag: String,
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp)
+            .testTag(testTag),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF111111), // Onyx-text
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF666666), // Charcoal-text
+                )
+            }
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outlineVariant,
+            )
+        }
+    }
+}

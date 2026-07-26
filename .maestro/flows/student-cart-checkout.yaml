@@ -1,0 +1,26 @@
+appId: com.mulaisekarang.app
+name: Student adds a paid course to the cart and previews the total
+---
+- runFlow: student-login.yaml
+- assertVisible:
+    id: "course_card"
+- tapOn:
+    id: "course_card"
+- assertVisible:
+    text: "Detail Course"
+# Only paid, unowned courses offer the cart button — free ones enrol instantly.
+- runFlow:
+    when:
+      visible:
+        id: "add_to_cart_button"
+    commands:
+      - tapOn:
+          id: "add_to_cart_button"
+      - assertVisible:
+          id: "cart_list"
+      - assertVisible:
+          id: "cart_total"
+      # Server prices the cart; the button stays enabled only when something is
+      # actually purchasable.
+      - assertVisible:
+          id: "cart_checkout_button"

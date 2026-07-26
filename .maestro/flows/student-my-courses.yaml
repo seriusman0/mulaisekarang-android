@@ -1,0 +1,12 @@
+appId: com.mulaisekarang.app
+name: Student opens My Courses and resumes a lesson
+---
+- runFlow: student-login.yaml
+- tapOn:
+    id: "nav_tab_kursus_saya"
+- assertVisible:
+    text: "KURSUS SAYA"
+# An enrolled student sees at least one course; a fresh account sees the empty
+# state. Accept either so the flow is not seed-dependent.
+- assertVisible:
+    text: ".*(Kursus|Belum).*"

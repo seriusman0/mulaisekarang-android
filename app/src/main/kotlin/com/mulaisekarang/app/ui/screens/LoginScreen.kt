@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -123,7 +124,8 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top = 8.dp)
+                .testTag("email_input"),
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -148,7 +150,8 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top = 8.dp)
+                .testTag("password_input"),
         )
 
         Row(
@@ -178,7 +181,8 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .padding(top = 24.dp),
+                .padding(top = 24.dp)
+                .testTag("login_button"),
         ) {
             if (uiState is AuthUiState.Submitting) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)

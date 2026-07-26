@@ -1,0 +1,26 @@
+appId: com.mulaisekarang.app
+name: Student hits the mentor-chat paywall
+---
+- runFlow: student-login.yaml
+- tapOn:
+    id: "nav_tab_akun"
+- scrollUntilVisible:
+    element:
+      id: "menu_chat_subscription"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "menu_chat_subscription"
+- assertVisible:
+    id: "chat_paywall"
+- assertVisible:
+    text: "Akses Chat Mentor"
+# A student who already has the add-on sees the active card instead of the
+# purchase controls; both outcomes are valid.
+- runFlow:
+    when:
+      notVisible:
+        id: "paywall_active"
+    commands:
+      - assertVisible:
+          id: "paywall_purchase_button"

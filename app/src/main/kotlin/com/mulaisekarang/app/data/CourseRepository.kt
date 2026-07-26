@@ -12,7 +12,7 @@ import com.mulaisekarang.app.data.local.course.CourseEntity
 import com.mulaisekarang.app.data.local.course.CourseRemoteMediator
 import com.mulaisekarang.app.data.local.course.FilteredCoursePagingSource
 import com.mulaisekarang.app.data.model.Category
-import com.mulaisekarang.app.data.model.CheckoutResponse
+import com.mulaisekarang.app.data.model.CheckoutResult
 import com.mulaisekarang.app.data.model.Course
 import com.mulaisekarang.app.data.model.CourseDetail
 import com.mulaisekarang.app.data.model.CoursesResponse
@@ -75,7 +75,7 @@ class CourseRepository @Inject constructor(
 
     suspend fun categories(): List<Category> = api.categories().data
 
-    suspend fun checkout(courseId: Int): CheckoutResponse = api.checkout(courseId)
+    suspend fun checkout(courseId: Int): CheckoutResult = api.checkout(courseId).data
 
-    suspend fun paymentStatus(referenceId: String): String = api.paymentStatus(referenceId).status
+    suspend fun paymentStatus(referenceId: String): String = api.paymentStatus(referenceId).data.status
 }

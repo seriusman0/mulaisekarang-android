@@ -1,0 +1,27 @@
+appId: com.mulaisekarang.app
+name: Student submits a course review
+---
+- runFlow: student-login.yaml
+- tapOn:
+    id: "nav_tab_kursus_saya"
+# Open the first enrolled course — the review form is gated on enrolment.
+- tapOn:
+    id: "course_card"
+- assertVisible:
+    text: "Detail Course"
+- scrollUntilVisible:
+    element:
+      id: "write_review_section"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "review_star_5"
+- tapOn:
+    id: "review_body_input"
+- inputText: "Materinya jelas dan mudah diikuti."
+- hideKeyboard
+- tapOn:
+    id: "review_submit_button"
+# The API answers 201 on create and 200 on replace; both land here.
+- assertVisible:
+    text: "Ulasan Anda tersimpan."

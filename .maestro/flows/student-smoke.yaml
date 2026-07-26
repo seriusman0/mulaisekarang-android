@@ -1,0 +1,61 @@
+appId: com.mulaisekarang.app
+name: Student smoke — every student feature is reachable
+---
+- runFlow: student-login.yaml
+# Catalogue
+- assertVisible:
+    id: "course_card"
+# Bottom-nav tabs all resolve.
+- tapOn:
+    id: "nav_tab_kursus_saya"
+- assertVisible:
+    text: "KURSUS SAYA"
+- tapOn:
+    id: "nav_tab_chat"
+- assertVisible:
+    text: "CHAT"
+- tapOn:
+    id: "nav_tab_akun"
+- assertVisible:
+    text: "Profil"
+# Every student menu entry opens its screen and comes back.
+- scrollUntilVisible:
+    element:
+      id: "menu_transactions"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "menu_transactions"
+- assertVisible:
+    text: "Riwayat Transaksi"
+- back
+- tapOn:
+    id: "menu_cart"
+- assertVisible:
+    text: "Keranjang"
+- back
+- tapOn:
+    id: "menu_notifications"
+- assertVisible:
+    text: "Notifikasi"
+- back
+- tapOn:
+    id: "menu_my_reviews"
+- assertVisible:
+    text: "Ulasan Saya"
+- back
+- tapOn:
+    id: "menu_quiz_history"
+- assertVisible:
+    text: "Riwayat Kuis"
+- back
+- tapOn:
+    id: "menu_submission_history"
+- assertVisible:
+    text: "Riwayat Tugas"
+- back
+- tapOn:
+    id: "menu_chat_subscription"
+- assertVisible:
+    id: "chat_paywall"
+- back

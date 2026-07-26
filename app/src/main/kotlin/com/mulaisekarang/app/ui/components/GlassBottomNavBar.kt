@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -86,6 +87,7 @@ private fun NavBarItem(tab: BottomNavTab, selected: Boolean, onClick: () -> Unit
     Column(
         modifier = Modifier
             .selectable(selected = selected, onClick = onClick)
+            .testTag("nav_tab_${tab.name.lowercase()}")
             .then(backgroundModifier),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

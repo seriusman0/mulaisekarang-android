@@ -43,11 +43,4 @@ class ChatListViewModel @Inject constructor(private val repository: ChatReposito
         }
     }
 
-    fun openAiTutor() {
-        viewModelScope.launch {
-            runCatching { repository.startAiTutorConversation() }
-                .onSuccess { conversation -> _openConversationEvent.emit(conversation.id) }
-                .onFailure { e -> _uiState.update { it.copy(error = e.userMessage("Gagal membuka AI Tutor.")) } }
-        }
-    }
 }

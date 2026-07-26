@@ -16,8 +16,6 @@ class ChatRepository @Inject constructor(private val api: ApiService) {
     suspend fun startConversation(username: String): Conversation =
         api.startConversation(StartConversationRequest(username)).data
 
-    suspend fun startAiTutorConversation(): Conversation = api.startAiTutorConversation().data
-
     suspend fun eligibleContacts(): List<Mentor> = api.eligibleContacts().data
 
     suspend fun createGroup(title: String, participantUsernames: List<String>): Conversation =
@@ -25,6 +23,6 @@ class ChatRepository @Inject constructor(private val api: ApiService) {
 
     suspend fun messages(conversationId: Int): List<ChatMessage> = api.messages(conversationId).data
 
-    suspend fun sendMessage(conversationId: Int, body: String): List<ChatMessage> =
+    suspend fun sendMessage(conversationId: Int, body: String): ChatMessage =
         api.sendMessage(conversationId, SendMessageRequest(body)).data
 }

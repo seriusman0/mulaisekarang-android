@@ -13,7 +13,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import com.mulaisekarang.app.data.network.SessionEventBus
 import com.mulaisekarang.app.ui.navigation.MulaiSekarangNavGraph
 import com.mulaisekarang.app.ui.theme.MulaiSekarangTheme
@@ -28,6 +31,7 @@ class MainActivity : ComponentActivity() {
 
     private var pendingDeepLink by mutableStateOf<Uri?>(null)
 
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -35,7 +39,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MulaiSekarangTheme(darkTheme = isSystemInDarkTheme()) {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                // Expose Compose testTags as resource-ids so Maestro can match by `id:`.
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics { testTagsAsResourceId = true },
+                    color = MaterialTheme.colorScheme.background,
+                ) {
                     MulaiSekarangNavGraph(
                         sessionEventBus = sessionEventBus,
                         deepLink = pendingDeepLink,

@@ -1,0 +1,23 @@
+appId: com.mulaisekarang.app
+name: Instructor grades an assignment submission
+---
+- runFlow: login.yaml
+- runFlow: open-portal.yaml
+- tapOn:
+    id: "nav_grading"
+# Grade the first submission if any exist; skip gracefully otherwise.
+- runFlow:
+    when:
+      visible:
+        id: "submission_row"
+    commands:
+      - tapOn:
+          id: "submission_row"
+      - assertVisible:
+          id: "grade_input"
+      - tapOn:
+          id: "grade_input"
+      - inputText: "85"
+      - hideKeyboard
+      - tapOn:
+          id: "grade_save_button"

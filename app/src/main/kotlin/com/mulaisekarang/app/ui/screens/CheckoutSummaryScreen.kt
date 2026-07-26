@@ -82,6 +82,11 @@ fun CheckoutSummaryScreen(
                     isProcessing = false
                     coroutineScope.launch { snackbarHostState.showSnackbar(event.message) }
                 }
+                is CheckoutEvent.Message -> {
+                    coroutineScope.launch { snackbarHostState.showSnackbar(event.text) }
+                }
+                // Reviews and chat are not reachable from checkout; nothing to do.
+                is CheckoutEvent.ChatPaywall -> isProcessing = false
             }
         }
     }

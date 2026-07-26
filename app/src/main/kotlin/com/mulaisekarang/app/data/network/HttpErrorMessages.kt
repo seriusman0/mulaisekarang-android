@@ -8,6 +8,19 @@ const val SESSION_EXPIRED_MESSAGE = "Sesi Anda telah berakhir, silakan login kem
 
 private val errorBodyJson = Json { ignoreUnknownKeys = true }
 
+/** The machine-readable `code` a 4xx body may carry, if any. */
+fun Throwable.apiErrorCode(): String? {
+    val http = this as? HttpException ?: return null
+
+    return runCatching {
+        errorBodyJson.decodeFromString(ApiErrorBody.serializer(), http.response()?.errorBody()?.string() ?: "")
+    }.getOrNull()?.code
+}
+
+/** True when the backend refused because the chat add-on is not active. */
+fun Throwable.isChatPaywall(): Boolean =
+    this is HttpException && code() == 403 && apiErrorCode() == "chat_subscription_required"
+
 fun Throwable.userMessage(fallback: String): String = when {
     this is HttpException && code() == 401 -> SESSION_EXPIRED_MESSAGE
     this is HttpException && code() == 403 -> "Anda tidak memiliki akses untuk melakukan ini."

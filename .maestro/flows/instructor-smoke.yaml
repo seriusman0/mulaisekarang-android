@@ -1,0 +1,26 @@
+appId: com.mulaisekarang.app
+name: Instructor portal smoke — all features reachable
+---
+- runFlow: login.yaml
+- runFlow: open-portal.yaml
+# Dashboard metrics + wallet visible.
+- assertVisible:
+    id: "metric_courses"
+- assertVisible:
+    id: "metric_students"
+- assertVisible:
+    id: "wallet_balance"
+# Each portal section opens.
+- tapOn:
+    id: "nav_courses"
+- assertVisible:
+    id: "create_course_button"
+- back
+- tapOn:
+    id: "nav_wallet"
+- assertVisible:
+    id: "withdrawal_submit"
+- back
+- tapOn:
+    id: "nav_grading"
+- back

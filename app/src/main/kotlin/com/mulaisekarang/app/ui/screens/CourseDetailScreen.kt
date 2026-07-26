@@ -38,6 +38,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -57,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,6 +76,7 @@ import com.mulaisekarang.app.ui.components.accentHtml
 import com.mulaisekarang.app.viewmodel.CheckoutEvent
 import com.mulaisekarang.app.viewmodel.CourseDetailUiState
 import com.mulaisekarang.app.viewmodel.CourseDetailViewModel
+import com.mulaisekarang.app.viewmodel.MyCourseReviewState
 import kotlinx.coroutines.launch
 
 private val EnrolledGreen = Color(0xFF16A34A)
@@ -90,8 +94,11 @@ fun CourseDetailScreen(
     onQuizClick: (quizId: Int) -> Unit,
     onAssignmentClick: (assignmentId: Int) -> Unit,
     onBuyNow: (courseId: Int) -> Unit,
+    onOpenCart: () -> Unit,
+    onChatPaywall: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val reviewState by viewModel.reviewState.collectAsState()
     val isSyncing = (uiState as? CourseDetailUiState.Loaded)?.isSyncing == true
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -117,6 +124,13 @@ fun CourseDetailScreen(
                 is CheckoutEvent.Error -> {
                     isCheckingOut = false
                     coroutineScope.launch { snackbarHostState.showSnackbar(event.message) }
+                }
+                is CheckoutEvent.Message -> {
+                    coroutineScope.launch { snackbarHostState.showSnackbar(event.text) }
+                }
+                is CheckoutEvent.ChatPaywall -> {
+                    isCheckingOut = false
+                    onChatPaywall()
                 }
             }
         }
@@ -257,11 +271,30 @@ fun CourseDetailScreen(
                                         shape = RoundedCornerShape(16.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(top = 12.dp),
+                                            .padding(top = 12.dp)
+                                            .testTag("buy_now_button"),
                                     ) {
                                         Text(
                                             if (course.currentPrice <= 0.0) "Daftar Gratis" else "Beli Sekarang",
                                         )
+                                    }
+
+                                    // Free courses enrol instantly, so a cart
+                                    // entry for them would be a dead end.
+                                    if (course.currentPrice > 0.0) {
+                                        OutlinedButton(
+                                            onClick = {
+                                                viewModel.addToCart()
+                                                onOpenCart()
+                                            },
+                                            shape = RoundedCornerShape(16.dp),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 8.dp)
+                                                .testTag("add_to_cart_button"),
+                                        ) {
+                                            Text("Tambah ke Keranjang")
+                                        }
                                     }
                                 }
                             }
@@ -320,6 +353,19 @@ fun CourseDetailScreen(
                         TopicSection(topic, onLessonClick, onQuizClick, onAssignmentClick)
                     }
 
+                    // Only enrolled students may review, matching the API gate.
+                    if (course.isEnrolled) {
+                        item {
+                            WriteReviewSection(
+                                state = reviewState,
+                                onRatingChange = viewModel::setReviewRating,
+                                onBodyChange = viewModel::setReviewBody,
+                                onSubmit = viewModel::submitReview,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                            )
+                        }
+                    }
+
                     if (course.reviews.isNotEmpty()) {
                         item {
                             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -362,6 +408,76 @@ fun CourseDetailScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Rating + comment form. The API treats a repeat submission as a replacement
+ * (201 on create, 200 on update), so there is one form, not separate
+ * create/edit modes.
+ */
+@Composable
+private fun WriteReviewSection(
+    state: MyCourseReviewState,
+    onRatingChange: (Int) -> Unit,
+    onBodyChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("write_review_section"),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                if (state.submitted) "Ulasan Anda" else "Beri Ulasan",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Row(modifier = Modifier.padding(top = 8.dp)) {
+                (1..5).forEach { star ->
+                    IconButton(
+                        onClick = { onRatingChange(star) },
+                        modifier = Modifier.testTag("review_star_$star"),
+                    ) {
+                        Icon(
+                            Icons.Filled.Star,
+                            contentDescription = "Beri $star bintang",
+                            tint = if (star <= state.rating) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant
+                            },
+                        )
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                value = state.body,
+                onValueChange = onBodyChange,
+                label = { Text("Komentar (opsional)") },
+                minLines = 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("review_body_input"),
+            )
+
+            Button(
+                onClick = onSubmit,
+                enabled = state.rating in 1..5 && !state.isSubmitting,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+                    .testTag("review_submit_button"),
+            ) {
+                Text(if (state.isSubmitting) "Mengirim…" else "Kirim Ulasan")
             }
         }
     }
