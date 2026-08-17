@@ -70,7 +70,7 @@ android {
             buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://v2.mulaisekarang.com/api/v1/\"")
+            buildConfigField("String", "BASE_URL", "\"https://course.mulaisekarang.com/api/v1/\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
