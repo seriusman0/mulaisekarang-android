@@ -106,10 +106,10 @@ class CourseDetailViewModel @Inject constructor(
         }
     }
 
-    fun checkout() {
+    fun checkout(courseBatchId: Int? = null) {
         viewModelScope.launch {
             _checkoutEvent.emit(CheckoutEvent.Loading)
-            runCatching { repository.checkout(courseId) }
+            runCatching { repository.checkout(courseId, courseBatchId) }
                 .onSuccess { response ->
                     if (response.status == "completed") {
                         pendingReferenceId = null

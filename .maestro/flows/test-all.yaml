@@ -1,0 +1,32 @@
+appId: com.mulaisekarang.app
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "qa-student@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+# Lakukan navigasi dan fitur dasar
+- tapOn: "Katalog"
+- extendedWaitUntil:
+    visible: "Cari kelas"
+    timeout: 5000
+
+- tapOn: "Profil"
+- extendedWaitUntil:
+    visible: "Keluar"
+    timeout: 5000
+- tapOn: "Keluar"
+
+- extendedWaitUntil:
+    visible: "Masuk ke Akun Anda"
+    timeout: 5000

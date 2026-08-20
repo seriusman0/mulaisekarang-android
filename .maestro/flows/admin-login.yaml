@@ -1,0 +1,19 @@
+appId: com.mulaisekarang.app
+name: Login as admin
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "email_input"
+- tapOn:
+    id: "email_input"
+- inputText: "admin@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "591VVrJdrhHy7tBQ"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+# Landed on Beranda (home) after successful login.
+- assertVisible:
+    text: "BERANDA"

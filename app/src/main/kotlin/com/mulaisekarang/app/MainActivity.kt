@@ -23,11 +23,30 @@ import com.mulaisekarang.app.ui.theme.MulaiSekarangTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import com.mulaisekarang.app.util.AppUpdateManager
+import com.mulaisekarang.app.data.model.AppVersionResponse
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var sessionEventBus: SessionEventBus
+
+    @Inject
+    lateinit var appUpdateManager: AppUpdateManager
 
     private var pendingDeepLink by mutableStateOf<Uri?>(null)
 
@@ -38,8 +57,21 @@ class MainActivity : ComponentActivity() {
         pendingDeepLink = intent?.data
 
         setContent {
+            var updateInfo by remember { mutableStateOf<AppVersionResponse?>(null) }
+            var isDownloading by remember { mutableStateOf(false) }
+            var downloadProgress by remember { mutableStateOf(0f) }
+            var showUpdateDialog by remember { mutableStateOf(false) }
+            val scope = rememberCoroutineScope()
+
+            LaunchedEffect(Unit) {
+                val info = appUpdateManager.checkUpdate()
+                if (info?.updateAvailable == true) {
+                    updateInfo = info
+                    showUpdateDialog = true
+                }
+            }
+
             MulaiSekarangTheme(darkTheme = isSystemInDarkTheme()) {
-                // Expose Compose testTags as resource-ids so Maestro can match by `id:`.
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
@@ -51,6 +83,58 @@ class MainActivity : ComponentActivity() {
                         deepLink = pendingDeepLink,
                         onDeepLinkConsumed = { pendingDeepLink = null },
                     )
+
+                    if (showUpdateDialog && updateInfo != null) {
+                        val required = updateInfo?.updateRequired == true
+                        AlertDialog(
+                            onDismissRequest = {
+                                if (!required && !isDownloading) {
+                                    showUpdateDialog = false
+                                }
+                            },
+                            title = { Text("Update Available") },
+                            text = {
+                                if (isDownloading) {
+                                    Column {
+                                        Text("Downloading update...")
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        LinearProgressIndicator(progress = { downloadProgress })
+                                    }
+                                } else {
+                                    Text(updateInfo?.releaseNotes ?: "A new version of the app is available.")
+                                }
+                            },
+                            confirmButton = {
+                                if (!isDownloading) {
+                                    TextButton(onClick = {
+                                        isDownloading = true
+                                        scope.launch {
+                                            val success = appUpdateManager.downloadAndInstall(updateInfo!!) { progress ->
+                                                downloadProgress = progress
+                                            }
+                                            isDownloading = false
+                                            if (!success && !required) {
+                                                showUpdateDialog = false
+                                            }
+                                        }
+                                    }) {
+                                        Text("Update")
+                                    }
+                                }
+                            },
+                            dismissButton = {
+                                if (!required && !isDownloading) {
+                                    TextButton(onClick = { showUpdateDialog = false }) {
+                                        Text("Later")
+                                    }
+                                }
+                            },
+                            properties = DialogProperties(
+                                dismissOnBackPress = !required && !isDownloading,
+                                dismissOnClickOutside = !required && !isDownloading
+                            )
+                        )
+                    }
                 }
             }
         }

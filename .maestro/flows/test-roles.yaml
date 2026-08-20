@@ -1,0 +1,86 @@
+appId: com.mulaisekarang.app
+---
+# ================= STUDENT =================
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "qa-student@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+- tapOn: "KURSUS SAYA"
+- extendedWaitUntil:
+    visible: "Anda belum terdaftar di course apa pun."
+    timeout: 5000
+
+- tapOn: "AKUN"
+- scrollUntilVisible:
+    element:
+      text: "  Keluar"
+    direction: DOWN
+    timeout: 10000
+- tapOn: "  Keluar"
+- extendedWaitUntil:
+    visible: "Selamat Datang"
+    timeout: 5000
+
+# ================= INSTRUCTOR =================
+- tapOn:
+    id: "email_input"
+- inputText: "qa-instructor@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+- tapOn: "AKUN"
+- extendedWaitUntil:
+    visible: "Portal Instruktur"
+    timeout: 5000
+- scrollUntilVisible:
+    element:
+      text: "  Keluar"
+    direction: DOWN
+    timeout: 10000
+- tapOn: "  Keluar"
+- extendedWaitUntil:
+    visible: "Selamat Datang"
+    timeout: 5000
+
+# ================= ADMINISTRATOR =================
+- tapOn:
+    id: "email_input"
+- inputText: "qa-admin@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+- tapOn: "AKUN"
+- scrollUntilVisible:
+    element:
+      text: "  Keluar"
+    direction: DOWN
+    timeout: 10000
+- tapOn: "  Keluar"
+- extendedWaitUntil:
+    visible: "Selamat Datang"
+    timeout: 5000

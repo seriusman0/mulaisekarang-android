@@ -1,0 +1,34 @@
+appId: com.mulaisekarang.app
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "qa-student@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+- tapOn: "AKUN"
+- scrollUntilVisible:
+    element:
+      id: "menu_chat_subscription"
+    direction: DOWN
+- tapOn:
+    id: "menu_chat_subscription"
+- extendedWaitUntil:
+    visible: "Chat dengan Mentor"
+    timeout: 5000
+
+# There should be a "Mulai Trial" button or something if the user is not subscribed.
+- tapOn:
+    id: "paywall_trial_button"
+- extendedWaitUntil:
+    visible: "Langganan aktif"
+    timeout: 5000

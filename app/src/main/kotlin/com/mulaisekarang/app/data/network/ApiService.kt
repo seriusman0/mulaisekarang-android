@@ -21,6 +21,7 @@ import com.mulaisekarang.app.data.model.SubmitReviewRequest
 import com.mulaisekarang.app.data.model.UnreadCountResponse
 import com.mulaisekarang.app.data.model.ChangePasswordRequest
 import com.mulaisekarang.app.data.model.CheckoutResponse
+import com.mulaisekarang.app.data.model.CourseCheckoutRequest
 import com.mulaisekarang.app.data.model.ConversationResponse
 import com.mulaisekarang.app.data.model.ConversationsResponse
 import com.mulaisekarang.app.data.model.CourseDetailResponse
@@ -138,7 +139,10 @@ interface ApiService {
     suspend fun dashboardSummary(): DashboardSummaryResponse
 
     @POST("courses/{courseId}/checkout")
-    suspend fun checkout(@Path("courseId") courseId: Int): CheckoutResponse
+    suspend fun checkout(
+        @Path("courseId") courseId: Int,
+        @Body request: CourseCheckoutRequest? = null
+    ): CheckoutResponse
 
     @GET("payment/status/{referenceId}")
     suspend fun paymentStatus(@Path("referenceId") referenceId: String): PaymentStatusResponse
@@ -317,4 +321,10 @@ interface ApiService {
 
     @DELETE("instructor/courses/{id}")
     suspend fun instructorDeleteCourse(@Path("id") id: Int): DeletedResponse
+
+    @GET("app/version")
+    suspend fun getAppVersion(
+        @Query("channel") channel: String,
+        @Query("current_version_code") currentVersionCode: Int
+    ): com.mulaisekarang.app.data.model.AppVersionResponse
 }

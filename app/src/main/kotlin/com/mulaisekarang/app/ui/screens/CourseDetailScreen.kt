@@ -262,7 +262,7 @@ fun CourseDetailScreen(
                                         Text("Chat dengan Mentor")
                                     }
                                 }
-                                if (!course.isEnrolled) {
+                                if (!course.isEnrolled && course.type != "mini_course") {
                                     Button(
                                         onClick = {
                                             if (course.currentPrice <= 0.0) viewModel.checkout() else onBuyNow(courseId)
@@ -330,6 +330,25 @@ fun CourseDetailScreen(
                                         .padding(16.dp),
                                 )
                             }
+                        }
+                    }
+
+                    if (course.type == "mini_course" && course.batches.isNotEmpty()) {
+                        item {
+                            Text(
+                                "Pilihan Jadwal / Batch",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            )
+                        }
+                        items(course.batches, key = { it.id }) { batch ->
+                            BatchCard(
+                                batch = batch,
+                                isEnrolled = course.isEnrolled && batch.zoomLink != null, // Approximation, PRD says zoom_link is non-null only if approved in this specific batch
+                                onCheckout = { viewModel.checkout(batch.id) },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                            )
                         }
                     }
 
@@ -735,4 +754,43 @@ private fun Lesson.formattedDuration(): String = when {
     durationHours > 0 -> "${durationHours * 60 + durationMinutes} Menit"
     durationMinutes > 0 -> "$durationMinutes Menit"
     else -> "$durationSeconds Detik"
+}
+
+@Composable
+private fun BatchCard(
+    batch: com.mulaisekarang.app.data.model.CourseBatch,
+    isEnrolled: Boolean,
+    onCheckout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(batch.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text("Mulai: ${batch.startTime}", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            Text("Sisa kursi: ${batch.availableSeats} / ${batch.maxSeats}", style = MaterialTheme.typography.bodySmall)
+            
+            if (isEnrolled && batch.zoomLink != null) {
+                Button(
+                    onClick = { /* Open Zoom Link logic if needed */ },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                ) {
+                    Text("Join Zoom")
+                }
+            } else if (!isEnrolled && !batch.isSoldOut) {
+                Button(
+                    onClick = onCheckout,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                ) {
+                    Text("Beli Batch Ini")
+                }
+            } else if (batch.isSoldOut) {
+                Text("Penuh", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
+            }
+        }
+    }
 }

@@ -97,6 +97,24 @@ data class Topic(
 )
 
 @Serializable
+data class CourseBatch(
+    val id: Int,
+    val title: String,
+    val tier: String,
+    @SerialName("class_mode") val classMode: String,
+    val instructor: Mentor? = null,
+    @SerialName("start_time") val startTime: String,
+    @SerialName("end_time") val endTime: String? = null,
+    @SerialName("max_seats") val maxSeats: Int,
+    @SerialName("enrolled_seats") val enrolledSeats: Int,
+    @SerialName("available_seats") val availableSeats: Int,
+    @SerialName("is_sold_out") val isSoldOut: Boolean,
+    val status: String,
+    @SerialName("zoom_link") val zoomLink: String? = null,
+    @SerialName("countdown_target_timestamp") val countdownTargetTimestamp: Long? = null,
+)
+
+@Serializable
 data class Review(
     val id: Int,
     val rating: Int,
@@ -128,6 +146,7 @@ data class CourseDetail(
     val tags: List<Tag> = emptyList(),
     val topics: List<Topic> = emptyList(),
     val reviews: List<Review> = emptyList(),
+    val batches: List<CourseBatch> = emptyList(),
     @SerialName("next_lesson_id") val nextLessonId: Int? = null,
     @SerialName("course_completed") val courseCompleted: Boolean = false,
     @SerialName("updated_at") val updatedAt: String? = null,
@@ -491,6 +510,11 @@ data class CompleteLessonResult(
 @Serializable
 data class CompleteLessonResponse(
     val data: CompleteLessonResult,
+)
+
+@Serializable
+data class CourseCheckoutRequest(
+    @SerialName("course_batch_id") val courseBatchId: Int? = null
 )
 
 @Serializable

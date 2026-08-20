@@ -1,0 +1,146 @@
+﻿
+08-17 12:11:42.575  1279  1279 E SQLiteDatabase: Error inserting rightsObject=null
+08-17 12:11:42.575  1279  1279 E SQLiteDatabase: android.database.sqlite.SQLiteConstraintException: NOT NULL constraint failed: LICENSE.instanceId (code 
+1299 SQLITE_CONSTRAINT_NOTNULL[1299])
+08-17 12:11:42.816  3301  3301 I SDHMS:BatteryStatsDBProvider: delete Exception : no such table: 10375 (code 1 SQLITE_ERROR[1]): , while compiling: DELETE 
+FROM [10375]
+08-17 12:11:42.941  1279  1279 E SQLiteDatabase: Error inserting rightsObject=null
+08-17 12:11:42.941  1279  1279 E SQLiteDatabase: android.database.sqlite.SQLiteConstraintException: NOT NULL constraint failed: LICENSE.instanceId (code 
+1299 SQLITE_CONSTRAINT_NOTNULL[1299])
+08-17 12:11:42.962  1279  1507 E WifiVendorHal: $r8$lambda$s6w0pmKyq6-tDdqCEDbOV_xqgVE(l.1179) failed {.code = ERROR_NOT_SUPPORTED, .description = }
+08-17 12:11:42.969  1279  3278 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:42.973  1279  3278 W AppSearchResult: Converting throwable to failed result.
+08-17 12:11:42.973  1279  3278 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:42.974  1279  3283 E AppSearchAppIndxrHlp: Failed to setSchema in batch due to invalid schema.
+08-17 12:11:42.974  1279  3283 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:42.998  1279  3278 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:43.000  1279  3278 W AppSearchResult: Converting throwable to failed result.
+08-17 12:11:43.000  1279  3278 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:43.001  1279  3283 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:43.949   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.99 dur=1509.56 
+max=511.83 min=494.32
+08-17 12:11:44.344  3246  3612 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.344  3246  3612 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.382  3246  8668 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.382  3246  8668 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.408  3246  3612 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.408  3246  3612 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.434  3246  8668 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.434  3246  8668 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.470  3246  3612 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.470  3246  3612 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.498  3246  8668 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.498  3246  8668 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.532  3246  3613 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.532  3246  3613 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.580  3246  3617 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.580  3246  3617 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.615  3246  3613 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.615  3246  3613 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.641  3246  3617 E MediaProvider: insertFileIfNecessary failed
+08-17 12:11:44.641  3246  3617 E MediaProvider: java.lang.IllegalArgumentException: Primary directory null not allowed for 
+content://media/external_primary/file; allowed directories are [Download, Documents]
+08-17 12:11:44.881  1279  3278 E AppSearchIcing: document-validator.cc:82: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.lenovo.anyshare.gps' not found Error while validating document (android$apps-db/apps, 
+com.lenovo.anyshare.gps)
+08-17 12:11:44.881  1279  3278 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.lenovo.anyshare.gps' not found
+08-17 12:11:44.881  1279  3278 E AppSearchIcing: document-validator.cc:82: Schema type config 
+'android$apps-db/builtin:MobileApplication-app.alextran.immich' not found Error while validating document (android$apps-db/apps, app.alextran.immich)
+08-17 12:11:44.881  1279  3278 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 
+'android$apps-db/builtin:MobileApplication-app.alextran.immich' not found
+08-17 12:11:44.881  1279  3278 E AppSearchIcing: document-validator.cc:82: Schema type config 'android$apps-db/builtin:MobileApplication-com.larus.wolf' 
+not found Error while validating document (android$apps-db/apps, com.larus.wolf)
+08-17 12:11:44.881  1279  3278 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.larus.wolf' not found
+08-17 12:11:44.883  1279  3283 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.lenovo.anyshare.gps' not found
+08-17 12:11:44.883  1279  3283 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 
+'android$apps-db/builtin:MobileApplication-app.alextran.immich' not found
+08-17 12:11:44.883  1279  3283 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.larus.wolf' not found
+08-17 12:11:44.955   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.99 dur=1006.45 
+max=503.37 min=503.08
+08-17 12:11:44.985  1279  3278 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:44.986  1279  3278 W AppSearchResult: Converting throwable to failed result.
+08-17 12:11:44.986  1279  3278 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:44.989  1279  3283 E AppSearchAppIndxrHlp: Failed to setSchema in batch due to invalid schema.
+08-17 12:11:44.989  1279  3283 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:45.008  1279  3278 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:45.009  1279  3278 W AppSearchResult: Converting throwable to failed result.
+08-17 12:11:45.009  1279  3278 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:45.011  1279  3283 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 
+'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.
+08-17 12:11:45.707 13191 13239 D gojni   : logtail: upload: log upload of 19934 bytes compressed failed 429: rate limited on bytes transferred per ID
+08-17 12:11:45.976  1279  1507 E WifiVendorHal: $r8$lambda$s6w0pmKyq6-tDdqCEDbOV_xqgVE(l.1179) failed {.code = ERROR_NOT_SUPPORTED, .description = }
+08-17 12:11:45.977   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.96 dur=1021.79 
+max=519.83 min=501.96
+08-17 12:11:46.131 19561 19561 I SepApiMethodCall: method:getDataRegState result:0 success:true error:null
+08-17 12:11:46.133 19561 19561 I SepApiMethodCall: method:getDataRoamingType result:0 success:true error:null
+08-17 12:11:46.135 19561 19561 I L       : writeLog : templog delete failed
+08-17 12:11:46.149 19561 19561 I SepApiMethodCall: method:getSimApplicationState result:10 success:true error:null
+08-17 12:11:46.158 19561 19561 I SepApiMethodCall: method:getSimApplicationState result:10 success:true error:null
+08-17 12:11:46.193 19561 19561 I SepApiMethodCall: method:getSimApplicationState result:10 success:true error:null
+08-17 12:11:46.202 19561 19561 I SepApiMethodCall: method:getSimApplicationState result:10 success:true error:null
+08-17 12:11:46.544  1279  3278 E AppSearchIcing: document-validator.cc:82: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.lenovo.anyshare.gps' not found Error while validating document (android$apps-db/apps, 
+com.lenovo.anyshare.gps)
+08-17 12:11:46.544  1279  3278 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.lenovo.anyshare.gps' not found
+08-17 12:11:46.544  1279  3278 E AppSearchIcing: document-validator.cc:82: Schema type config 
+'android$apps-db/builtin:MobileApplication-app.alextran.immich' not found Error while validating document (android$apps-db/apps, app.alextran.immich)
+08-17 12:11:46.544  1279  3278 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 
+'android$apps-db/builtin:MobileApplication-app.alextran.immich' not found
+08-17 12:11:46.544  1279  3278 E AppSearchIcing: document-validator.cc:82: Schema type config 'android$apps-db/builtin:MobileApplication-com.larus.wolf' 
+not found Error while validating document (android$apps-db/apps, com.larus.wolf)
+08-17 12:11:46.544  1279  3278 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.larus.wolf' not found
+08-17 12:11:46.546  1279  3283 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.lenovo.anyshare.gps' not found
+08-17 12:11:46.546  1279  3283 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 
+'android$apps-db/builtin:MobileApplication-app.alextran.immich' not found
+08-17 12:11:46.546  1279  3283 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 
+'android$apps-db/builtin:MobileApplication-com.larus.wolf' not found
+08-17 12:11:46.602  2055  2137 E ActivityThread: Failed to find provider info for com.samsung.android.app.deepsky.DeepSkyQuery.provider
+08-17 12:11:47.494   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.98 dur=1516.56 
+max=525.61 min=487.41
+08-17 12:11:48.496   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.99 dur=1002.84 
+max=503.35 min=499.50
+08-17 12:11:48.995  1279  1507 E WifiVendorHal: $r8$lambda$s6w0pmKyq6-tDdqCEDbOV_xqgVE(l.1179) failed {.code = ERROR_NOT_SUPPORTED, .description = }
+08-17 12:11:49.499   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.99 dur=1002.88 
+max=502.35 min=500.53
+08-17 12:11:50.507   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.99 dur=1007.50 
+max=504.28 min=503.22
+08-17 12:11:52.016  1279  1507 E WifiVendorHal: $r8$lambda$s6w0pmKyq6-tDdqCEDbOV_xqgVE(l.1179) failed {.code = ERROR_NOT_SUPPORTED, .description = }
+08-17 12:11:52.034   801   801 I BufferQueueProducer: 
+[com.mulaisekarang.app/com.mulaisekarang.app.MainActivity$_20385#391](this:0xb40000782258d838,id:-1,api:0,p:-1,c:801) queueBuffer: fps=1.96 dur=1527.53 
+max=538.45 min=469.32
+
+

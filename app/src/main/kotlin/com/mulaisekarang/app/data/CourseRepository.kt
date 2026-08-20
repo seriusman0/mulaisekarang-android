@@ -14,6 +14,7 @@ import com.mulaisekarang.app.data.local.course.FilteredCoursePagingSource
 import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.data.model.CheckoutResult
 import com.mulaisekarang.app.data.model.Course
+import com.mulaisekarang.app.data.model.CourseCheckoutRequest
 import com.mulaisekarang.app.data.model.CourseDetail
 import com.mulaisekarang.app.data.model.CoursesResponse
 import com.mulaisekarang.app.data.model.toCourseSummary
@@ -75,7 +76,10 @@ class CourseRepository @Inject constructor(
 
     suspend fun categories(): List<Category> = api.categories().data
 
-    suspend fun checkout(courseId: Int): CheckoutResult = api.checkout(courseId).data
+    suspend fun checkout(courseId: Int, courseBatchId: Int? = null): CheckoutResult {
+        val request = if (courseBatchId != null) CourseCheckoutRequest(courseBatchId) else null
+        return api.checkout(courseId, request).data
+    }
 
     suspend fun paymentStatus(referenceId: String): String = api.paymentStatus(referenceId).data.status
 }

@@ -66,7 +66,7 @@ android {
             // Local Laravel dev server (php artisan serve --host=0.0.0.0), reached over Tailscale by default.
             // Override with -PapiBaseUrl=http://10.0.2.2:8001/api/v1/ when testing on an emulator.
             val apiBaseUrl = (project.findProperty("apiBaseUrl") as String?)
-                ?: "http://100.101.150.38:8001/api/v1/"
+                ?: "https://course.mulaisekarang.com/api/v1/"
             buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
         }
         release {
