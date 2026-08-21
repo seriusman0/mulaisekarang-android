@@ -46,7 +46,7 @@ android {
         buildConfigField(
             "String",
             "GOOGLE_WEB_CLIENT_ID",
-            "\"785712319782-ps89gis6i0uc83kjesjg9k0qtj1nlue8.apps.googleusercontent.com\"",
+            "\"785712319782-043gtftbprm13mj3jv7ds8vovp30le2m.apps.googleusercontent.com\"",
         )
     }
 
@@ -66,11 +66,11 @@ android {
             // Local Laravel dev server (php artisan serve --host=0.0.0.0), reached over Tailscale by default.
             // Override with -PapiBaseUrl=http://10.0.2.2:8001/api/v1/ when testing on an emulator.
             val apiBaseUrl = (project.findProperty("apiBaseUrl") as String?)
-                ?: "https://course.mulaisekarang.com/api/v1/"
+                ?: "https://mulaisekarang.com/api/v1/"
             buildConfigField("String", "BASE_URL", "\"$apiBaseUrl\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://course.mulaisekarang.com/api/v1/\"")
+            buildConfigField("String", "BASE_URL", "\"https://mulaisekarang.com/api/v1/\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

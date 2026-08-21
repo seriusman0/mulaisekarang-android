@@ -180,8 +180,8 @@ fun LoginScreen(
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
                 .padding(top = 24.dp)
+                .height(56.dp)
                 .testTag("login_button"),
         ) {
             if (uiState is AuthUiState.Submitting) {

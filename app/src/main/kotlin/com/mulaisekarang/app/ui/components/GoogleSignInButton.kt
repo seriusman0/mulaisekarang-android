@@ -1,5 +1,6 @@
 package com.mulaisekarang.app.ui.components
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -42,6 +43,14 @@ fun GoogleSignInButton(
         shape = RoundedCornerShape(20.dp),
         modifier = modifier,
     ) {
-        Text(label, fontWeight = FontWeight.Bold)
+        if (!enabled) {
+            androidx.compose.material3.CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.primary
+            )
+        } else {
+            Text(label, fontWeight = FontWeight.Bold)
+        }
     }
 }
