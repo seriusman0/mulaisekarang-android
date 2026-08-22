@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mulaisekarang.app.ui.components.ErrorState
 import com.mulaisekarang.app.ui.components.HtmlText
@@ -102,8 +103,12 @@ fun LessonPlayerScreen(
                         )
                     }
 
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(lesson.title, style = MaterialTheme.typography.headlineSmall)
+                    Column(modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                        Text(
+                            lesson.title,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                        )
 
                         val duration = listOfNotNull(
                             lesson.durationHours.takeIf { it > 0 }?.let { "${it}j" },
@@ -140,10 +145,10 @@ fun LessonPlayerScreen(
                         lesson.content?.takeIf { it.isNotBlank() }?.let {
                             HtmlText(
                                 html = it,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 12.dp),
+                                    .padding(top = 20.dp),
                             )
                         }
 

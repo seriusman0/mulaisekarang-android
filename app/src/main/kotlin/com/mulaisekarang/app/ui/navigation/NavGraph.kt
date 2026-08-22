@@ -3,7 +3,10 @@ package com.mulaisekarang.app.ui.navigation
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -170,28 +173,13 @@ fun MulaiSekarangNavGraph(
         onDeepLinkConsumed()
     }
 
-    Scaffold(
-        bottomBar = {
-            if (currentRoute in Routes.BOTTOM_NAV_ROUTES) {
-                GlassBottomNavBar(
-                    currentRoute = currentRoute,
-                    onTabSelected = { tab ->
-                        navController.navigate(tab.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                )
-            }
-        },
-    ) { scaffoldPadding ->
+    // extendBody equivalent: content renders full-screen behind the floating glass
+    // navbar (no reserved bottomBar slot) so lists can glide behind its blur; each
+    // scrollable screen adds its own bottom content-padding to clear the navbar.
+    Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
             startDestination = Routes.SPLASH,
-            modifier = Modifier.padding(
-                bottom = if (currentRoute in Routes.BOTTOM_NAV_ROUTES) scaffoldPadding.calculateBottomPadding() else 0.dp,
-            ),
         ) {
             composable(Routes.SPLASH) {
                 SplashScreen(
@@ -643,6 +631,20 @@ fun MulaiSekarangNavGraph(
                 val transactionHistoryViewModel: TransactionHistoryViewModel = hiltViewModel()
                 TransactionHistoryScreen(viewModel = transactionHistoryViewModel)
             }
+        }
+
+        if (currentRoute in Routes.BOTTOM_NAV_ROUTES) {
+            GlassBottomNavBar(
+                currentRoute = currentRoute,
+                onTabSelected = { tab ->
+                    navController.navigate(tab.route) {
+                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 }

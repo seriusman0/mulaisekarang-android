@@ -88,7 +88,7 @@ fun ProfileScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 110.dp),
         ) {
             // Header Row: title "Profil" on the left, edit icon button on the right
             Row(
@@ -102,13 +102,13 @@ fun ProfileScreen(
                     "Profil",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF111111) // Onyx-text
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 IconButton(onClick = onEditProfile) {
                     Icon(
                         Icons.Filled.Edit,
                         contentDescription = "Edit Profil",
-                        tint = Color(0xFF111111)
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -159,14 +159,14 @@ fun ProfileScreen(
                             user.displayName,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF111111), // Onyx-text
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(top = 16.dp),
                         )
                         // Email
                         Text(
                             user.email,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF666666), // Charcoal-text
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 2.dp),
                         )
                         // Role Badge
@@ -186,7 +186,7 @@ fun ProfileScreen(
                         Text(
                             if (!user.bio.isNullOrBlank()) user.bio else "Suka belajar hal baru setiap hari.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF666666), // Charcoal-text
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 16.dp),
                             textAlign = TextAlign.Center
                         )
@@ -219,7 +219,7 @@ fun ProfileScreen(
                     "AKTIVITAS SAYA",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
-                    color = Color(0xFF666666), // Charcoal-text
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 24.dp, bottom = 12.dp, start = 4.dp),
                 )
 
@@ -253,12 +253,12 @@ fun ProfileScreen(
                                     "Portal Instruktur",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF111111),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     "Kelola kelas, penilaian, & pendapatan",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF666666),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outlineVariant)
@@ -302,12 +302,12 @@ fun ProfileScreen(
                                 "Kursus Saya",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF111111) // Onyx-text
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 "Lanjutkan pembelajaran Anda",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF666666), // Charcoal-text
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         Icon(
@@ -436,12 +436,12 @@ private fun ProfileMenuRow(
                     title,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF111111), // Onyx-text
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     subtitle,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF666666), // Charcoal-text
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Icon(

@@ -2,6 +2,7 @@ package com.mulaisekarang.app.ui.screens
 
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,6 +47,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -140,6 +143,9 @@ fun CourseDetailScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Detail Course") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Kembali")
@@ -173,7 +179,7 @@ fun CourseDetailScreen(
                 val mentorUsername = course.mentor?.username
 
                 LazyColumn(
-                    contentPadding = PaddingValues(bottom = 24.dp),
+                    contentPadding = PaddingValues(bottom = 100.dp),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
@@ -288,6 +294,10 @@ fun CourseDetailScreen(
                                                 onOpenCart()
                                             },
                                             shape = RoundedCornerShape(16.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                            ),
+                                            border = BorderStroke(1.5.dp, Color(0xFF7F8C8D)),
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(top = 8.dp)

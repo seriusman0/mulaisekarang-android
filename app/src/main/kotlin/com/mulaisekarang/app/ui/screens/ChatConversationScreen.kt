@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -39,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -163,14 +165,24 @@ fun ChatConversationScreen(
                     onValueChange = { draft = it },
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("Tulis pesan...") },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                 )
-                IconButton(onClick = {
-                    if (draft.isNotBlank()) {
-                        viewModel.sendMessage(draft)
-                        draft = ""
-                    }
-                }) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Kirim")
+                IconButton(
+                    onClick = {
+                        if (draft.isNotBlank()) {
+                            viewModel.sendMessage(draft)
+                            draft = ""
+                        }
+                    },
+                    modifier = Modifier.padding(start = 4.dp),
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Kirim", tint = Color(0xFF3498DB))
                 }
             }
         }
@@ -180,14 +192,14 @@ fun ChatConversationScreen(
 @Composable
 private fun MessageBubble(message: ChatMessage, isAiTutor: Boolean = false, showSenderName: Boolean = false) {
     val bubbleColor = when {
-        message.isMine -> MaterialTheme.colorScheme.primary
+        message.isMine -> Color(0xFF3498DB)
         isAiTutor -> MaterialTheme.colorScheme.inverseSurface
-        else -> MaterialTheme.colorScheme.surfaceVariant
+        else -> Color(0xFFEAEAEA)
     }
     val textColor = when {
-        message.isMine -> MaterialTheme.colorScheme.onPrimary
+        message.isMine -> Color.White
         isAiTutor -> MaterialTheme.colorScheme.inverseOnSurface
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> Color(0xFF1A1A1A)
     }
     val alignment = if (message.isMine) Alignment.CenterEnd else Alignment.CenterStart
 
@@ -195,7 +207,7 @@ private fun MessageBubble(message: ChatMessage, isAiTutor: Boolean = false, show
         Column(
             modifier = Modifier
                 .widthIn(max = 280.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(6.dp))
                 .background(bubbleColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {

@@ -1,0 +1,16 @@
+appId: com.mulaisekarang.app
+name: Login with Email
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "qa-student@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 20000

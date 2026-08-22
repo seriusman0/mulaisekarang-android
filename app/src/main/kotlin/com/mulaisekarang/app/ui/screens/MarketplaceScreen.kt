@@ -43,6 +43,9 @@ import com.mulaisekarang.app.ui.components.EmptyState
 import com.mulaisekarang.app.ui.components.ErrorState
 import com.mulaisekarang.app.ui.components.IdrCurrencyFormat
 import com.mulaisekarang.app.viewmodel.MarketplaceViewModel
+import androidx.compose.ui.graphics.Color
+
+private val SearchBarBackground = Color(0xFF2C3E50)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,9 +76,16 @@ fun MarketplaceScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(20.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    unfocusedContainerColor = SearchBarBackground,
+                    focusedContainerColor = SearchBarBackground,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedTextColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedPlaceholderColor = Color(0xFFBDC3C7),
+                    focusedPlaceholderColor = Color(0xFFBDC3C7),
+                    unfocusedLeadingIconColor = Color(0xFFBDC3C7),
+                    focusedLeadingIconColor = Color(0xFFBDC3C7),
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,7 +140,7 @@ fun MarketplaceScreen(
                     )
 
                     else -> LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 100.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
@@ -155,7 +165,7 @@ fun MarketplaceScreen(
                                 ) {
                                     Text(
                                         if (course.currentPrice <= 0.0) "Gratis" else IdrCurrencyFormat.format(course.currentPrice),
-                                        style = MaterialTheme.typography.labelLarge,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
@@ -190,14 +200,13 @@ fun MarketplaceScreen(
 
 @Composable
 private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-    val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val contentColor = if (selected) Color.White else Color(0xFFBDC3C7)
 
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = containerColor,
-        border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        color = SearchBarBackground,
+        border = if (selected) BorderStroke(1.dp, Color(0xFFBDC3C7)) else null,
     ) {
         Text(
             label.uppercase(),
