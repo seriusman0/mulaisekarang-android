@@ -1,20 +1,22 @@
 package com.mulaisekarang.app.ui.components
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.credentials.exceptions.GetCredentialCancellationException
-import com.mulaisekarang.app.auth.GoogleAuthClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.mulaisekarang.app.BuildConfig
 import com.mulaisekarang.app.viewmodel.AuthViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun GoogleSignInButton(
@@ -24,19 +26,37 @@ fun GoogleSignInButton(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val googleAuthClient = remember { GoogleAuthClient(context) }
+    val googleSignInClient = remember {
+        val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+            .requestEmail()
+            .build()
+        GoogleSignIn.getClient(context, options)
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account.idToken
+            if (idToken != null) {
+                authViewModel.loginWithGoogle(idToken)
+            } else {
+                authViewModel.reportError("Google sign-in gagal: ID token kosong.")
+            }
+        } catch (e: ApiException) {
+            if (e.statusCode != com.google.android.gms.common.api.CommonStatusCodes.CANCELED) {
+                authViewModel.reportError("[GoogleSignIn ${e.statusCode}] ${e.message ?: "Google sign-in gagal."}")
+            }
+        }
+    }
 
     OutlinedButton(
         onClick = {
-            coroutineScope.launch {
-                googleAuthClient.signIn()
-                    .onSuccess { idToken -> authViewModel.loginWithGoogle(idToken) }
-                    .onFailure { error ->
-                        if (error !is GetCredentialCancellationException) {
-                            authViewModel.reportError(error.message ?: "Google sign-in gagal.")
-                        }
-                    }
+            googleSignInClient.signOut().addOnCompleteListener {
+                launcher.launch(googleSignInClient.signInIntent)
             }
         },
         enabled = enabled,

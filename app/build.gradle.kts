@@ -38,15 +38,18 @@ android {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.0.2"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
         // Google ID tokens requested on Android must use this as the audience so the backend can verify them.
+        // Must be the "Web application" OAuth client type (not "Android") — see mulai-sekarang-auth
+        // project, client "Web Client Self Hosted". Using an Android-type client ID here causes
+        // DEVELOPER_ERROR (status 10) on legacy GoogleSignIn and a silent cancellation on Credential Manager.
         buildConfigField(
             "String",
             "GOOGLE_WEB_CLIENT_ID",
-            "\"785712319782-043gtftbprm13mj3jv7ds8vovp30le2m.apps.googleusercontent.com\"",
+            "\"785712319782-ps89gis6i0uc83kjesjg9k0qtj1nlue8.apps.googleusercontent.com\"",
         )
     }
 
@@ -141,6 +144,7 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")

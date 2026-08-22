@@ -5,15 +5,24 @@ nothing here can be automated from the repo. Everything that *could* be prepared
 from the repo (signing config, R8, icon, screenshots, listing copy, privacy policy)
 is already done — see `README.md` → "Release build" and the rest of this folder.
 
-## 1. ~~Google Cloud Console — register the release SHA-1~~ ✅ Done
-Registered — Android OAuth client `785712319782-043gtftbprm13mj3jv7ds8vovp30le2m...`
-now covers the release SHA-1 (`DE:7A:D6:09:71:46:30:30:EF:B9:E0:BC:3B:C7:42:3B:10:AD:19:96`).
-No code change was needed (see README.md's Google Sign-In section for why).
+## 1. Google Cloud Console — register the release SHA-1
+⚠️ The original `mulaisekarang-release.jks` was lost; a new release keystore was
+generated (2026-08-21). The old registered SHA-1 (`DE:7A:D6:09...`) is stale —
+register the **new** release SHA-1 instead:
+`B7:C3:73:0B:48:D4:A0:42:AE:46:29:C7:BE:22:0D:33:17:D7:4C:23`
+as a new Android OAuth client (package `com.mulaisekarang.app`) in the
+`mulai-sekarang-auth` Google Cloud project. `keystore.properties` / the `.jks`
+are gitignored — see README.md's Google Sign-In section for the client layout.
+
+After the first Play Console upload with **Play App Signing** enabled, also
+register the separate "App signing certificate" SHA-1 that Play Console shows
+under Setup → App signing — that's the cert Play re-signs the app with for
+end users, different from this upload-key SHA-1.
 
 ## 2. Play Console — create the app
 1. Create app → name "Mulai Sekarang" (or per final `listing-copy.md`) → Education category → Free.
 2. Store listing: upload `play-store-icon-512.png`, `feature-graphic-1024x500.png`, and the screenshots in `screenshots/`. Paste in the short/full description from `listing-copy.md`.
-3. Privacy policy URL: `https://v2.mulaisekarang.com/privacy-policy` — **confirm this is actually live** (deploy the backend changes in `resources/views/public/privacy-policy.blade.php` + the new route in `routes/web.php` first; this repo's local dev server isn't what Play Console will check).
+3. Privacy policy URL: `https://mulaisekarang.com/privacy-policy` — confirmed live (200 OK, checked 2026-08-21).
 
 ## 3. Play Console — required questionnaires
 - **Data safety**: use `data-safety.md` as the answer key.

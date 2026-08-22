@@ -64,10 +64,15 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
-                val info = appUpdateManager.checkUpdate()
-                if (info?.updateAvailable == true) {
-                    updateInfo = info
-                    showUpdateDialog = true
+                // Play Store owns updates for Play-installed builds; the in-app APK
+                // self-updater is only relevant for direct/sideload distribution.
+                val installedFromPlayStore = packageManager.getInstallerPackageName(packageName) == "com.android.vending"
+                if (!installedFromPlayStore) {
+                    val info = appUpdateManager.checkUpdate()
+                    if (info?.updateAvailable == true) {
+                        updateInfo = info
+                        showUpdateDialog = true
+                    }
                 }
             }
 

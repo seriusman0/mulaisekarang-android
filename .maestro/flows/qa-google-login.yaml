@@ -1,0 +1,15 @@
+appId: com.mulaisekarang.app
+name: Login with Google (seriusman0@gmail.com)
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "email_input"
+- tapOn: "Masuk dengan Google"
+- extendedWaitUntil:
+    visible: "Seriusman Waruwu"
+    timeout: 10000
+- tapOn: "Seriusman Waruwu"
+- extendedWaitUntil:
+    visible: "BERANDA"
+    timeout: 20000

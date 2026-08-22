@@ -52,6 +52,7 @@ Education (Pendidikan)
 - No location sharing, no ads (confirm before submitting — this draft assumes none).
 
 ## Contact details for the listing
-- Email: (fill in — a real, monitored support address)
-- Website: https://v2.mulaisekarang.com
-- Privacy policy URL: https://v2.mulaisekarang.com/privacy-policy (live once deployed)
+- Email: admin@mulaisekarang.com
+- Website: https://mulaisekarang.com
+- Privacy policy URL: https://mulaisekarang.com/privacy-policy (confirmed live)
+- Delete account URL: https://mulaisekarang.com/hapus-akun (confirmed live)
