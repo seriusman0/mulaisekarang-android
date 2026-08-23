@@ -19,6 +19,7 @@ val hasGoogleServices = rootProject.file("app/google-services.json").exists()
 if (hasGoogleServices) {
     apply(plugin = "com.google.gms.google-services")
     apply(plugin = "com.google.firebase.crashlytics")
+    apply(plugin = "com.google.firebase.firebase-perf")
 }
 
 // Release signing credentials, kept out of the repo — see keystore.properties.example / README.md.
@@ -171,6 +172,7 @@ dependencies {
     if (hasGoogleServices) {
         implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
         implementation("com.google.firebase:firebase-crashlytics-ktx")
+        implementation("com.google.firebase:firebase-perf-ktx")
     }
 
     testImplementation("junit:junit:4.13.2")
