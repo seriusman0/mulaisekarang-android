@@ -8,6 +8,7 @@ import com.mulaisekarang.app.data.LessonRepository
 import com.mulaisekarang.app.data.TokenStore
 import com.mulaisekarang.app.data.VideoProgressStore
 import com.mulaisekarang.app.data.model.LessonDetail
+import com.mulaisekarang.app.util.CrashReporter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,6 +41,7 @@ class LessonPlayerViewModel @Inject constructor(
     private val lessonRepository: LessonRepository,
     private val tokenStore: TokenStore,
     private val videoProgressStore: VideoProgressStore,
+    private val crashReporter: CrashReporter,
     val videoCache: Cache,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -75,6 +77,10 @@ class LessonPlayerViewModel @Inject constructor(
     /** Called periodically and on dispose by the player so progress survives backgrounding. */
     fun savePlaybackPosition(positionMs: Long) {
         viewModelScope.launch { videoProgressStore.savePositionMs(lessonId, positionMs) }
+    }
+
+    fun reportPlaybackError(error: Throwable) {
+        crashReporter.logNonFatal("video_playback_error_lesson_$lessonId", error)
     }
 
     fun markComplete() {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "689297738646",
+    "project_id": "mulaisekarang-1ce12",
+    "storage_bucket": "mulaisekarang-1ce12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:689297738646:android:8bed3cf7fea65ec9b7abb7",
+        "android_client_info": {
+          "package_name": "com.mulaisekarang.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAx2taw2SrfnPEuqw6KCMy4OuvvvWzlX9k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

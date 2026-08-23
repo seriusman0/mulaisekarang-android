@@ -12,6 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -33,9 +35,11 @@ fun VideoPlayer(
     modifier: Modifier = Modifier,
     startPositionMs: Long = 0L,
     onPositionChanged: (Long) -> Unit = {},
+    onPlaybackError: (PlaybackException) -> Unit = {},
 ) {
     val context = LocalContext.current
     val onPositionChangedState = rememberUpdatedState(onPositionChanged)
+    val onPlaybackErrorState = rememberUpdatedState(onPlaybackError)
 
     val exoPlayer = remember(streamUrl, authToken) {
         val httpDataSourceFactory = DefaultHttpDataSource.Factory().apply {
@@ -55,6 +59,11 @@ fun VideoPlayer(
             .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(cacheDataSourceFactory))
             .build()
             .apply {
+                addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        onPlaybackErrorState.value(error)
+                    }
+                })
                 setMediaItem(MediaItem.fromUri(streamUrl))
                 if (startPositionMs > 0L) seekTo(startPositionMs)
                 prepare()

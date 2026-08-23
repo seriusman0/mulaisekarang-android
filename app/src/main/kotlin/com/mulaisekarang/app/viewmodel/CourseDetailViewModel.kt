@@ -10,6 +10,7 @@ import com.mulaisekarang.app.data.model.Conversation
 import com.mulaisekarang.app.data.model.CourseDetail
 import com.mulaisekarang.app.data.network.isChatPaywall
 import com.mulaisekarang.app.data.network.userMessage
+import com.mulaisekarang.app.util.CrashReporter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -55,6 +56,7 @@ class CourseDetailViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val reviewRepository: ReviewRepository,
     private val cartRepository: CartRepository,
+    private val crashReporter: CrashReporter,
 ) : ViewModel() {
 
     private val _reviewState = MutableStateFlow(MyCourseReviewState())
@@ -120,7 +122,10 @@ class CourseDetailViewModel @Inject constructor(
                         response.invoiceUrl?.let { _checkoutEvent.emit(CheckoutEvent.OpenInvoice(it)) }
                     }
                 }
-                .onFailure { _checkoutEvent.emit(CheckoutEvent.Error(it.userMessage("Gagal memproses pembayaran."))) }
+                .onFailure {
+                    crashReporter.logNonFatal("checkout_failed_course_$courseId", it)
+                    _checkoutEvent.emit(CheckoutEvent.Error(it.userMessage("Gagal memproses pembayaran.")))
+                }
         }
     }
 

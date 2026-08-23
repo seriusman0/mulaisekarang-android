@@ -102,6 +102,7 @@ fun LessonPlayerScreen(
                             videoCache = viewModel.videoCache,
                             startPositionMs = state.startPositionMs,
                             onPositionChanged = { positionMs -> viewModel.savePlaybackPosition(positionMs) },
+                            onPlaybackError = { error -> viewModel.reportPlaybackError(error) },
                             modifier = Modifier.fillMaxWidth(),
                         )
                         if (state.startPositionMs > 0L) {

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.mulaisekarang.app.data.AuthRepository
 import com.mulaisekarang.app.data.model.User
 import com.mulaisekarang.app.data.network.userMessage
+import com.mulaisekarang.app.util.CrashReporter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject
@@ -36,10 +37,18 @@ sealed interface ChangePasswordEvent {
 }
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
+class AuthViewModel @Inject constructor(
+    private val repository: AuthRepository,
+    private val crashReporter: CrashReporter,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Checking)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    private fun setLoggedIn(user: User) {
+        _uiState.value = AuthUiState.LoggedIn(user)
+        crashReporter.setUser(user)
+    }
 
     private val _profileUpdateEvent = MutableSharedFlow<ProfileUpdateEvent>(extraBufferCapacity = 1)
     val profileUpdateEvent: SharedFlow<ProfileUpdateEvent> = _profileUpdateEvent
@@ -51,7 +60,7 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
         viewModelScope.launch {
             if (repository.hasToken()) {
                 runCatching { repository.me() }
-                    .onSuccess { _uiState.value = AuthUiState.LoggedIn(it) }
+                    .onSuccess { setLoggedIn(it) }
                     .onFailure { _uiState.value = AuthUiState.LoggedOut }
             } else {
                 _uiState.value = AuthUiState.LoggedOut
@@ -63,8 +72,11 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
         _uiState.value = AuthUiState.Submitting
         viewModelScope.launch {
             runCatching { repository.login(email, password) }
-                .onSuccess { _uiState.value = AuthUiState.LoggedIn(it) }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Login gagal.") }
+                .onSuccess { setLoggedIn(it) }
+                .onFailure {
+                    crashReporter.logNonFatal("login_failed", it)
+                    _uiState.value = AuthUiState.Error(it.message ?: "Login gagal.")
+                }
         }
     }
 
@@ -72,7 +84,7 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
         _uiState.value = AuthUiState.Submitting
         viewModelScope.launch {
             runCatching { repository.register(firstName, lastName, username, email, password) }
-                .onSuccess { _uiState.value = AuthUiState.LoggedIn(it) }
+                .onSuccess { setLoggedIn(it) }
                 .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Registrasi gagal.") }
         }
     }
@@ -81,7 +93,7 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
         _uiState.value = AuthUiState.Submitting
         viewModelScope.launch {
             runCatching { repository.loginWithGoogle(idToken) }
-                .onSuccess { _uiState.value = AuthUiState.LoggedIn(it) }
+                .onSuccess { setLoggedIn(it) }
                 .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Google sign-in gagal.") }
         }
     }
@@ -95,7 +107,7 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
             _profileUpdateEvent.emit(ProfileUpdateEvent.Loading)
             runCatching { repository.updateProfile(firstName, lastName, username, bio, photoFile) }
                 .onSuccess {
-                    _uiState.value = AuthUiState.LoggedIn(it)
+                    setLoggedIn(it)
                     _profileUpdateEvent.emit(ProfileUpdateEvent.Success)
                 }
                 .onFailure {
@@ -118,6 +130,7 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
     fun logout() {
         viewModelScope.launch {
             repository.logout()
+            crashReporter.clearUser()
             _uiState.value = AuthUiState.LoggedOut
         }
     }
