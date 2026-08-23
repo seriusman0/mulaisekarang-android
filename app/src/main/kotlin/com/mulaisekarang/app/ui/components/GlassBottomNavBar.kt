@@ -1,5 +1,8 @@
 package com.mulaisekarang.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +23,12 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.testTag
@@ -72,39 +76,53 @@ fun GlassBottomNavBar(
     }
 }
 
+private val NavItemShape = RoundedCornerShape(50)
+private const val NavItemAnimationDurationMs = 250
+
 @Composable
 private fun NavBarItem(tab: BottomNavTab, selected: Boolean, onClick: () -> Unit) {
     val tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    val backgroundModifier = if (selected) {
-        Modifier
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    } else {
-        Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    }
+    val transitionSpec = tween<Color>(durationMillis = NavItemAnimationDurationMs, easing = EaseInOut)
+    val backgroundColor by animateColorAsState(
+        targetValue = if (selected) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        } else {
+            Color.Transparent
+        },
+        animationSpec = transitionSpec,
+        label = "navItemBackground",
+    )
 
-    Column(
-        modifier = Modifier
-            .selectable(selected = selected, onClick = onClick)
-            .testTag("nav_tab_${tab.name.lowercase()}")
-            .then(backgroundModifier),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    // Surface (rather than a bare clip + selectable) is what guarantees the
+    // press/hover ripple is bounded to `shape` instead of falling back to a
+    // hard-edged rectangle.
+    Surface(
+        selected = selected,
+        onClick = onClick,
+        shape = NavItemShape,
+        color = backgroundColor,
+        contentColor = tint,
+        modifier = Modifier.testTag("nav_tab_${tab.name.lowercase()}"),
     ) {
-        Icon(
-            imageVector = tab.icon,
-            contentDescription = tab.label,
-            tint = tint,
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            tab.label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            fontSize = 10.sp,
-            color = tint
-        )
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Icon(
+                imageVector = tab.icon,
+                contentDescription = tab.label,
+                tint = tint,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                tab.label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp,
+                color = tint
+            )
+        }
     }
 }
 
