@@ -5,7 +5,7 @@ name: Login with Google (seriusman0@gmail.com)
     clearState: true
 - assertVisible:
     id: "email_input"
-- tapOn: "Masuk dengan Google"
+- tapOn: "Lanjutkan dengan Google"
 - extendedWaitUntil:
     visible: "Seriusman Waruwu"
     timeout: 10000

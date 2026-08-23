@@ -1,0 +1,25 @@
+appId: com.mulaisekarang.app
+name: Full redesign check — marketplace, course detail, chat, profile (production)
+---
+- runFlow: admin-login.yaml
+- tapOn: "BELANJA"
+- assertVisible:
+    id: "course_card"
+- tapOn:
+    id: "course_card"
+- extendedWaitUntil:
+    visible: "Detail Course"
+    timeout: 10000
+- back
+- tapOn:
+    id: "nav_tab_chat"
+- assertVisible:
+    text: "CHAT"
+- tapOn:
+    id: "nav_tab_akun"
+- assertVisible:
+    text: "Profil"
+- assertVisible:
+    text: "Admin Mulaisekarang"
+- assertVisible:
+    text: "Kursus Saya"

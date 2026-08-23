@@ -1,0 +1,62 @@
+appId: com.mulaisekarang.app
+name: QA student smoke — every student feature is reachable (production)
+---
+- runFlow: qa-email-login.yaml
+# Catalogue (Marketplace always has courses; the home "featured" rail may be empty).
+- tapOn: "BELANJA"
+- assertVisible:
+    id: "course_card"
+- back
+# Bottom-nav tabs all resolve.
+- tapOn:
+    id: "nav_tab_kursus_saya"
+- assertVisible:
+    text: "KURSUS SAYA"
+- tapOn:
+    id: "nav_tab_chat"
+- assertVisible:
+    text: "CHAT"
+- tapOn:
+    id: "nav_tab_akun"
+- assertVisible:
+    text: "Profil"
+- scrollUntilVisible:
+    element:
+      id: "menu_transactions"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "menu_transactions"
+- assertVisible:
+    text: "Riwayat Transaksi"
+- back
+- tapOn:
+    id: "nav_tab_akun"
+- assertVisible:
+    text: "Profil"
+- scrollUntilVisible:
+    element:
+      id: "menu_cart"
+    direction: DOWN
+    timeout: 20000
+# Cart may auto-redirect to "Kursus Saya" if the account's cart holds a
+# free item that enrolls on load — tolerate either landing screen.
+- tapOn:
+    id: "menu_cart"
+- extendedWaitUntil:
+    visible: "Keranjang|KURSUS SAYA"
+    timeout: 5000
+- tapOn:
+    id: "nav_tab_akun"
+- assertVisible:
+    text: "Profil"
+- scrollUntilVisible:
+    element:
+      id: "menu_notifications"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "menu_notifications"
+- assertVisible:
+    text: "Notifikasi"
+- back
