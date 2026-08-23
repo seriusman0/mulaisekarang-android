@@ -62,11 +62,10 @@ class CourseRepository @Inject constructor(
 
     suspend fun refreshCourseDetail(id: Int) {
         val detail = api.courseDetail(id).data
-        val existingDetail = courseDao.getDetailById(id)
-        if (existingDetail != null && existingDetail.updatedAt != null && existingDetail.updatedAt == detail.updatedAt) {
-            return
-        }
-
+        // `updatedAt` only tracks the course's own content, not per-user state
+        // (is_enrolled, lesson is_accessible/is_completed) — skipping the write
+        // when it's unchanged left enrolled students stuck looking locked-out.
+        // Always write through so that state stays current.
         courseDao.upsertDetail(CourseDetailEntity.fromDomain(detail))
 
         val existingCourseRow = courseDao.getById(id)
@@ -77,8 +76,10 @@ class CourseRepository @Inject constructor(
     suspend fun categories(): List<Category> = api.categories().data
 
     suspend fun checkout(courseId: Int, courseBatchId: Int? = null): CheckoutResult {
-        val request = if (courseBatchId != null) CourseCheckoutRequest(courseBatchId) else null
-        return api.checkout(courseId, request).data
+        // Retrofit rejects a null @Body outright ("Body parameter value must not
+        // be null"), so always send a request object — course_batch_id itself
+        // stays nullable in the JSON for non-batch courses.
+        return api.checkout(courseId, CourseCheckoutRequest(courseBatchId)).data
     }
 
     suspend fun paymentStatus(referenceId: String): String = api.paymentStatus(referenceId).data.status

@@ -141,7 +141,7 @@ interface ApiService {
     @POST("courses/{courseId}/checkout")
     suspend fun checkout(
         @Path("courseId") courseId: Int,
-        @Body request: CourseCheckoutRequest? = null
+        @Body request: CourseCheckoutRequest
     ): CheckoutResponse
 
     @GET("payment/status/{referenceId}")
