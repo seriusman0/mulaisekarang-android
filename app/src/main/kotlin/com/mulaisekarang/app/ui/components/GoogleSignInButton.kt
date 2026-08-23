@@ -2,13 +2,17 @@ package com.mulaisekarang.app.ui.components
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,6 +28,9 @@ fun GoogleSignInButton(
     enabled: Boolean,
     label: String,
     modifier: Modifier = Modifier,
+    contentColor: Color? = null,
+    borderColor: Color? = null,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(20.dp),
 ) {
     val context = LocalContext.current
     val googleSignInClient = remember {
@@ -60,14 +67,18 @@ fun GoogleSignInButton(
             }
         },
         enabled = enabled,
-        shape = RoundedCornerShape(20.dp),
+        shape = shape,
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = contentColor ?: MaterialTheme.colorScheme.onSurface,
+        ),
+        border = BorderStroke(1.dp, borderColor ?: MaterialTheme.colorScheme.outline),
         modifier = modifier,
     ) {
         if (!enabled) {
             androidx.compose.material3.CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 2.dp,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                color = contentColor ?: MaterialTheme.colorScheme.onSurface,
             )
         } else {
             Text(label, fontWeight = FontWeight.Bold)

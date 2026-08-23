@@ -4,15 +4,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,10 +28,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,12 +57,14 @@ import com.mulaisekarang.app.ui.components.GoogleSignInButton
 import com.mulaisekarang.app.viewmodel.AuthUiState
 import com.mulaisekarang.app.viewmodel.AuthViewModel
 
-private val LoginBackground = Color(0xFF101426)
-private val LoginInputFill = Color(0xFF1A1F36)
-private val LoginPrimaryBlue = Color(0xFF3B82F6)
-private val LoginTextGrey = Color(0xFFA0AABF)
-private val LoginHintGrey = Color(0xFF6B7280)
-private val LoginDividerGrey = Color(0xFF272E4A)
+private val LoginBackground = Color(0xFF0F1322)
+private val LoginLogoFill = Color(0xFF1E2336)
+private val LoginPrimaryBlue = Color(0xFF2563EB)
+private val LoginTextGrey = Color(0xFF94A3B8) // slate-400
+private val LoginPlaceholderGrey = Color(0xFFCBD5E1) // slate-300
+private val LoginIndicatorGrey = Color(0xFF475569) // slate-600
+private val LoginDividerGrey = Color(0xFF334155) // slate-700
+private val LoginIconGrey = Color(0xFF64748B) // slate-500
 
 @Composable
 fun LoginScreen(
@@ -87,103 +88,69 @@ fun LoginScreen(
             .background(color = LoginBackground)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(top = 64.dp, bottom = 16.dp),
+            .padding(top = 48.dp, bottom = 24.dp),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(),
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp),
         ) {
             Image(
                 painter = painterResource(R.drawable.logo),
                 contentDescription = "Mulai Sekarang",
                 modifier = Modifier
-                    .size(85.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(LoginInputFill)
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(LoginLogoFill)
                     .padding(20.dp),
-            )
-            Text(
-                "Selamat Datang",
-                color = Color.White,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 16.dp),
-            )
-            Text(
-                "Masuk untuk melanjutkan proses belajar dan capai\ntargetmu.",
-                color = LoginTextGrey,
-                fontSize = 13.sp,
-                lineHeight = 17.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 6.dp),
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text("Alamat Email", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(6.dp))
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            placeholder = { Text("contoh@email.com", color = LoginHintGrey, fontSize = 14.sp) },
-            leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null, tint = LoginHintGrey) },
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = LoginInputFill,
-                focusedContainerColor = LoginInputFill,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
-                unfocusedTextColor = Color.White,
-                focusedTextColor = Color.White,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("email_input"),
+        Text(
+            "Selamat Datang",
+            color = Color.White,
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        )
+        Text(
+            "Masuk untuk melanjutkan proses belajar dan capai targetmu.",
+            color = LoginTextGrey,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 0.dp).padding(bottom = 32.dp),
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        LoginUnderlineField(
+            value = email,
+            onValueChange = { email = it },
+            placeholder = "Alamat Email",
+            leadingIcon = Icons.Filled.Email,
+            keyboardType = KeyboardType.Email,
+            testTag = "email_input",
+        )
 
-        Text("Kata Sandi", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(6.dp))
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(20.dp))
+
+        LoginUnderlineField(
             value = password,
             onValueChange = { password = it },
-            placeholder = { Text("••••••••", color = LoginHintGrey, fontSize = 14.sp) },
-            leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null, tint = LoginHintGrey) },
-            trailingIcon = {
-                IconButton(onClick = { showPassword = !showPassword }) {
-                    Icon(
-                        if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                        contentDescription = if (showPassword) "Sembunyikan kata sandi" else "Tampilkan kata sandi",
-                        tint = LoginHintGrey,
-                    )
-                }
-            },
-            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = LoginInputFill,
-                focusedContainerColor = LoginInputFill,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent,
-                unfocusedTextColor = Color.White,
-                focusedTextColor = Color.White,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("password_input"),
+            placeholder = "Kata Sandi",
+            leadingIcon = Icons.Filled.Lock,
+            keyboardType = KeyboardType.Password,
+            isPassword = true,
+            showPassword = showPassword,
+            onTogglePasswordVisibility = { showPassword = !showPassword },
+            testTag = "password_input",
         )
 
         TextButton(
             onClick = onNavigateToForgotPassword,
             contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.padding(top = 6.dp),
+            modifier = Modifier.padding(top = 12.dp),
         ) {
             Text("Lupa Kata Sandi?", color = LoginPrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
@@ -200,7 +167,7 @@ fun LoginScreen(
         Button(
             onClick = { authViewModel.login(email, password) },
             enabled = uiState !is AuthUiState.Submitting && email.isNotBlank() && password.isNotBlank(),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = LoginPrimaryBlue,
                 contentColor = Color.White,
@@ -209,14 +176,14 @@ fun LoginScreen(
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 12.dp)
+                .padding(top = 24.dp)
                 .height(52.dp)
                 .testTag("login_button"),
         ) {
             if (uiState is AuthUiState.Submitting) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
             } else {
-                Text("MASUK", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text("MASUK", fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
         }
 
@@ -224,13 +191,14 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 28.dp),
         ) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = LoginDividerGrey)
             Text(
                 "  ATAU  ",
-                color = LoginTextGrey,
+                color = LoginIconGrey,
                 fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
             )
             HorizontalDivider(modifier = Modifier.weight(1f), color = LoginDividerGrey)
         }
@@ -238,7 +206,10 @@ fun LoginScreen(
         GoogleSignInButton(
             authViewModel = authViewModel,
             enabled = uiState !is AuthUiState.Submitting,
-            label = "Masuk dengan Google",
+            label = "Lanjutkan dengan Google",
+            contentColor = Color.White,
+            borderColor = LoginIndicatorGrey,
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
@@ -249,15 +220,60 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
+                .padding(top = 24.dp),
         ) {
             Text("Belum punya akun? ", color = LoginTextGrey, fontSize = 13.sp)
             TextButton(
                 onClick = onNavigateToRegister,
                 contentPadding = PaddingValues(0.dp),
             ) {
-                Text("Daftar", color = LoginPrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text("Daftar", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
+}
+
+@Composable
+private fun LoginUnderlineField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    keyboardType: KeyboardType,
+    testTag: String,
+    isPassword: Boolean = false,
+    showPassword: Boolean = false,
+    onTogglePasswordVisibility: (() -> Unit)? = null,
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(placeholder, color = LoginPlaceholderGrey, fontSize = 15.sp) },
+        leadingIcon = { Icon(leadingIcon, contentDescription = null, tint = LoginIconGrey, modifier = Modifier.size(20.dp)) },
+        trailingIcon = if (isPassword) {
+            {
+                IconButton(onClick = { onTogglePasswordVisibility?.invoke() }) {
+                    Icon(
+                        if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = if (showPassword) "Sembunyikan kata sandi" else "Tampilkan kata sandi",
+                        tint = LoginIconGrey,
+                    )
+                }
+            }
+        } else null,
+        visualTransformation = if (isPassword && !showPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 15.sp),
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            unfocusedIndicatorColor = LoginIndicatorGrey,
+            focusedIndicatorColor = LoginPrimaryBlue,
+            cursorColor = LoginPrimaryBlue,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(testTag),
+    )
 }
