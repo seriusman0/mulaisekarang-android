@@ -83,18 +83,19 @@ fun LoginScreen(
     }
 
     Column(
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxSize()
             .background(color = LoginBackground)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(top = 48.dp, bottom = 24.dp),
+            .padding(vertical = 24.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp),
+                .padding(bottom = 20.dp),
         ) {
             Image(
                 painter = painterResource(R.drawable.logo),
@@ -121,7 +122,7 @@ fun LoginScreen(
             fontSize = 14.sp,
             lineHeight = 20.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 0.dp).padding(bottom = 32.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).padding(bottom = 20.dp),
         )
 
         LoginUnderlineField(
@@ -133,7 +134,7 @@ fun LoginScreen(
             testTag = "email_input",
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         LoginUnderlineField(
             value = password,
@@ -176,7 +177,7 @@ fun LoginScreen(
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp)
+                .padding(top = 18.dp)
                 .height(52.dp)
                 .testTag("login_button"),
         ) {
@@ -191,7 +192,7 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 28.dp),
+                .padding(vertical = 20.dp),
         ) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = LoginDividerGrey)
             Text(
@@ -220,7 +221,7 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp),
+                .padding(top = 18.dp),
         ) {
             Text("Belum punya akun? ", color = LoginTextGrey, fontSize = 13.sp)
             TextButton(
