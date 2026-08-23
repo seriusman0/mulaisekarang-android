@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -86,7 +87,7 @@ fun LoginScreen(
             .background(color = LoginBackground)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(top = 40.dp, bottom = 16.dp),
+            .padding(top = 64.dp, bottom = 16.dp),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -107,7 +108,7 @@ fun LoginScreen(
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier.padding(top = 16.dp),
             )
             Text(
                 "Masuk untuk melanjutkan proses belajar dan capai\ntargetmu.",
@@ -115,11 +116,11 @@ fun LoginScreen(
                 fontSize = 13.sp,
                 lineHeight = 17.sp,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 6.dp),
             )
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text("Alamat Email", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(6.dp))
@@ -144,7 +145,7 @@ fun LoginScreen(
                 .testTag("email_input"),
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text("Kata Sandi", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(6.dp))
@@ -179,13 +180,12 @@ fun LoginScreen(
                 .testTag("password_input"),
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            horizontalArrangement = Arrangement.Start,
+        TextButton(
+            onClick = onNavigateToForgotPassword,
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.padding(top = 6.dp),
         ) {
-            TextButton(onClick = onNavigateToForgotPassword) {
-                Text("Lupa Kata Sandi?", color = LoginPrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            }
+            Text("Lupa Kata Sandi?", color = LoginPrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
 
         if (uiState is AuthUiState.Error) {
@@ -209,7 +209,7 @@ fun LoginScreen(
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 12.dp)
                 .height(52.dp)
                 .testTag("login_button"),
         ) {
@@ -224,7 +224,7 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
+                .padding(vertical = 16.dp),
         ) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = LoginDividerGrey)
             Text(
@@ -246,12 +246,16 @@ fun LoginScreen(
 
         Row(
             horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp),
+                .padding(top = 16.dp),
         ) {
             Text("Belum punya akun? ", color = LoginTextGrey, fontSize = 13.sp)
-            TextButton(onClick = onNavigateToRegister) {
+            TextButton(
+                onClick = onNavigateToRegister,
+                contentPadding = PaddingValues(0.dp),
+            ) {
                 Text("Daftar", color = LoginPrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             }
         }
