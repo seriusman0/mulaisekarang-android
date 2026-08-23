@@ -71,10 +71,10 @@ import com.mulaisekarang.app.data.model.Lesson
 import com.mulaisekarang.app.data.model.Mentor
 import com.mulaisekarang.app.data.model.Review
 import com.mulaisekarang.app.data.model.Topic
+import com.mulaisekarang.app.ui.components.CourseDetailSkeleton
 import com.mulaisekarang.app.ui.components.ErrorState
 import com.mulaisekarang.app.ui.components.HtmlText
 import com.mulaisekarang.app.ui.components.IdrCurrencyFormat
-import com.mulaisekarang.app.ui.components.LoadingState
 import com.mulaisekarang.app.ui.components.accentHtml
 import com.mulaisekarang.app.viewmodel.CheckoutEvent
 import com.mulaisekarang.app.viewmodel.CourseDetailUiState
@@ -166,7 +166,7 @@ fun CourseDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when (val state = uiState) {
-            is CourseDetailUiState.Loading -> LoadingState(modifier = Modifier.padding(padding))
+            is CourseDetailUiState.Loading -> CourseDetailSkeleton(modifier = Modifier.padding(padding))
 
             is CourseDetailUiState.Error -> ErrorState(
                 message = state.message,

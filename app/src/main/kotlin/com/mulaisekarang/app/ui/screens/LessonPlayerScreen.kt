@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mulaisekarang.app.ui.components.ErrorState
 import com.mulaisekarang.app.ui.components.HtmlText
-import com.mulaisekarang.app.ui.components.LoadingState
+import com.mulaisekarang.app.ui.components.LessonPlayerSkeleton
 import com.mulaisekarang.app.ui.components.VideoPlayer
 import com.mulaisekarang.app.viewmodel.LessonPlayerEvent
 import com.mulaisekarang.app.viewmodel.LessonPlayerUiState
@@ -78,7 +78,7 @@ fun LessonPlayerScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         when (val state = uiState) {
-            is LessonPlayerUiState.Loading -> LoadingState(modifier = Modifier.padding(padding))
+            is LessonPlayerUiState.Loading -> LessonPlayerSkeleton(modifier = Modifier.padding(padding))
 
             is LessonPlayerUiState.Error -> ErrorState(
                 message = state.message,
@@ -99,8 +99,19 @@ fun LessonPlayerScreen(
                         VideoPlayer(
                             streamUrl = it,
                             authToken = state.authToken,
+                            videoCache = viewModel.videoCache,
+                            startPositionMs = state.startPositionMs,
+                            onPositionChanged = { positionMs -> viewModel.savePlaybackPosition(positionMs) },
                             modifier = Modifier.fillMaxWidth(),
                         )
+                        if (state.startPositionMs > 0L) {
+                            Text(
+                                "Melanjutkan dari ${formatResumeTimestamp(state.startPositionMs)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                            )
+                        }
                     }
 
                     Column(modifier = Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)) {
@@ -170,4 +181,11 @@ fun LessonPlayerScreen(
             }
         }
     }
+}
+
+private fun formatResumeTimestamp(positionMs: Long): String {
+    val totalSeconds = positionMs / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "%d:%02d".format(minutes, seconds)
 }

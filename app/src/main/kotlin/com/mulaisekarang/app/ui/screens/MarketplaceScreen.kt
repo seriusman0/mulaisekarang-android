@@ -39,6 +39,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.ui.components.CourseCard
+import com.mulaisekarang.app.ui.components.CourseListSkeleton
 import com.mulaisekarang.app.ui.components.EmptyState
 import com.mulaisekarang.app.ui.components.ErrorState
 import com.mulaisekarang.app.ui.components.IdrCurrencyFormat
@@ -135,7 +136,9 @@ fun MarketplaceScreen(
                         onRetry = { lazyPagingItems.retry() },
                     )
 
-                    lazyPagingItems.itemCount == 0 && refreshState !is LoadState.Loading -> EmptyState(
+                    lazyPagingItems.itemCount == 0 && refreshState is LoadState.Loading -> CourseListSkeleton()
+
+                    lazyPagingItems.itemCount == 0 -> EmptyState(
                         message = "Tidak ada course yang ditemukan. Coba kata kunci atau kategori lain.",
                     )
 
