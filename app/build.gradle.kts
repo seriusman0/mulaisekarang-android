@@ -33,14 +33,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.mulaisekarang.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 4
-        versionName = "1.0.3"
+        targetSdk = 36
+        versionCode = 5
+        versionName = "1.0.4"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
         // Google ID tokens requested on Android must use this as the audience so the backend can verify them.
