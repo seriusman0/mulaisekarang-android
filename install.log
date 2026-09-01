@@ -1,0 +1,3 @@
+Performing Streamed Install
+adb.exe: failed to install app\build\outputs\apk\debug\app-debug.apk: Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package com.mulaisekarang.app signatures do not match newer version; ignoring!]
+

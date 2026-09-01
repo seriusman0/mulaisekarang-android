@@ -76,10 +76,14 @@ class AuthRepository @Inject constructor(
     ): User {
         fun part(value: String?): RequestBody = (value ?: "").toRequestBody("text/plain".toMediaType())
 
+        // Backend memvalidasi first_name, last_name, dan username sebagai field WAJIB
+        // (sama seperti saat register) — jika di-skip saat kosong, server balas 422
+        // "field is required". Jadi selalu kirim ketiganya (boleh string kosong),
+        // hanya bio yang aman untuk di-skip kalau memang null.
         val fields = buildMap {
             put("first_name", part(firstName))
-            lastName?.let { put("last_name", part(it)) }
-            username?.let { put("username", part(it)) }
+            put("last_name", part(lastName))
+            put("username", part(username))
             bio?.let { put("bio", part(it)) }
         }
         val photoPart = photoFile?.let {

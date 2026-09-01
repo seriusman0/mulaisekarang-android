@@ -255,8 +255,10 @@ fun EditProfileScreen(
                             val photoFile = pickedPhotoUri?.let { uriToFile(context, it) }
                             authViewModel.updateProfile(
                                 firstName = firstName,
-                                lastName = lastName.ifBlank { null },
-                                username = username.ifBlank { null },
+                                // last_name & username wajib diisi backend (lihat AuthRepository.updateProfile),
+                                // jadi jangan diubah jadi null walau kosong.
+                                lastName = lastName,
+                                username = username,
                                 bio = bio.ifBlank { null },
                                 photoFile = photoFile,
                             )

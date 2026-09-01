@@ -1,0 +1,3 @@
+List of devices attached
+R9RT4079YQL            device product:a03snnxx model:SM_A037F device:a03s transport_id:1
+

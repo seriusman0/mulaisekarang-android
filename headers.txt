@@ -1,0 +1,12 @@
+HTTP/1.1 301 Moved Permanently
+Date: Tue, 01 Sep 2026 06:22:39 GMT
+Content-Type: text/html
+Connection: keep-alive
+location: https://mulaisekarang.com/api/v1/auth/login
+Server: cloudflare
+cf-cache-status: DYNAMIC
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=Yvv67iWY07P0fIFZdWWhOH0Z6ixESy7vb6kw%2FDaLwhZWZriv9ndr2Oa3DNbW53pIZ157H15mgl6%2BMaXJSguJrOUmZ2X4y0mQ6esXXcg%2Fd5hC8yfrQOPPSvb2FPAazu%2BHaTdRtXjFQNRnMcJLo3UblETYmLJCiug%3D"}]}
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+CF-RAY: a3422e8709edecf2-CGK
+alt-svc: h3=":443"; ma=86400
+

@@ -28,6 +28,11 @@ fun Throwable.userMessage(fallback: String): String = when {
     this is HttpException && code() == 409 -> runCatching {
         errorBodyJson.decodeFromString(ApiErrorBody.serializer(), response()?.errorBody()?.string() ?: "")
     }.getOrNull()?.message ?: fallback
+    this is HttpException && code() == 422 -> runCatching {
+        errorBodyJson.decodeFromString(ApiErrorBody.serializer(), response()?.errorBody()?.string() ?: "")
+    }.getOrNull()?.let { body ->
+        body.errors?.values?.flatten()?.firstOrNull() ?: body.message
+    } ?: fallback
     this is HttpException && code() >= 500 -> "Terjadi gangguan pada server, coba lagi nanti."
     else -> message ?: fallback
 }
