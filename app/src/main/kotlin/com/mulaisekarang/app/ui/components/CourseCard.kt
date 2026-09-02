@@ -28,7 +28,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.mulaisekarang.app.ui.theme.Accent
 import java.text.NumberFormat
 import java.util.Locale
@@ -53,9 +55,11 @@ fun CourseCard(
             .fillMaxWidth()
             .testTag("course_card"),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
             modifier = Modifier
@@ -64,7 +68,11 @@ fun CourseCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AsyncImage(
-                model = coverImageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverImageUrl)
+                    .size(160) // ~2x an 80dp target — avoids decoding full-res remote images
+                    .crossfade(true)
+                    .build(),
                 contentDescription = title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

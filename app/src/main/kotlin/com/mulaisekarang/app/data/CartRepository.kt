@@ -26,6 +26,8 @@ class CartRepository @Inject constructor(private val api: ApiService) {
     private val _courseIds = MutableStateFlow<List<Int>>(emptyList())
     val courseIds: StateFlow<List<Int>> = _courseIds.asStateFlow()
 
+    private val _voucherCode = MutableStateFlow<String?>(null)
+
     /** The API caps a cart at 20 entries; enforce it before the round-trip. */
     fun add(courseId: Int): Boolean {
         if (_courseIds.value.contains(courseId)) return true
@@ -37,13 +39,22 @@ class CartRepository @Inject constructor(private val api: ApiService) {
 
     fun remove(courseId: Int) = _courseIds.update { ids -> ids.filterNot { it == courseId } }
 
-    fun clear() = _courseIds.update { emptyList() }
+    fun clear() {
+        _courseIds.update { emptyList() }
+        _voucherCode.value = null
+    }
 
     fun contains(courseId: Int): Boolean = _courseIds.value.contains(courseId)
 
-    suspend fun preview(): CartPreview = api.cartPreview(CartRequest(_courseIds.value)).data
+    fun setVoucherCode(code: String?) {
+        _voucherCode.value = code
+    }
 
-    suspend fun checkout(): CheckoutResult = api.cartCheckout(CartRequest(_courseIds.value)).data
+    suspend fun preview(): CartPreview =
+        api.cartPreview(CartRequest(_courseIds.value, _voucherCode.value)).data
+
+    suspend fun checkout(): CheckoutResult =
+        api.cartCheckout(CartRequest(_courseIds.value, _voucherCode.value)).data
 
     companion object {
         const val MAX_ITEMS = 20

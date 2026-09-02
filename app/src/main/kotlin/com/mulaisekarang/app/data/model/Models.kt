@@ -800,6 +800,7 @@ data class StudentSubmissionResponse(val data: StudentSubmission)
 @Serializable
 data class CartRequest(
     @SerialName("course_ids") val courseIds: List<Int>,
+    @SerialName("voucher_code") val voucherCode: String? = null,
 )
 
 @Serializable
@@ -818,10 +819,20 @@ data class CartLine(
 )
 
 @Serializable
+data class VoucherInfo(
+    val code: String,
+    val type: String,
+    val value: Double,
+    val label: String,
+)
+
+@Serializable
 data class CartPreview(
     val items: List<CartLine> = emptyList(),
     val subtotal: Int = 0,
+    val discount: Int = 0,
     val total: Int = 0,
+    val voucher: VoucherInfo? = null,
     val issues: List<CartIssue> = emptyList(),
 )
 

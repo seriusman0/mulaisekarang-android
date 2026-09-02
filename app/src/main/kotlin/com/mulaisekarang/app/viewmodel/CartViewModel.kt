@@ -20,6 +20,9 @@ data class CartUiState(
     val isLoading: Boolean = false,
     val isCheckingOut: Boolean = false,
     val error: String? = null,
+    val voucherInput: String = "",
+    val isApplyingVoucher: Boolean = false,
+    val voucherError: String? = null,
 )
 
 sealed interface CartEvent {
@@ -68,6 +71,49 @@ class CartViewModel @Inject constructor(
 
     fun clear() {
         cartRepository.clear()
+        refresh()
+    }
+
+    fun onVoucherInputChange(text: String) {
+        _uiState.update { it.copy(voucherInput = text, voucherError = null) }
+    }
+
+    fun applyVoucher() {
+        val code = _uiState.value.voucherInput.trim()
+        if (code.isBlank()) {
+            _uiState.update { it.copy(voucherError = "Masukkan kode voucher terlebih dahulu.") }
+            return
+        }
+
+        _uiState.update { it.copy(isApplyingVoucher = true, voucherError = null) }
+        viewModelScope.launch {
+            cartRepository.setVoucherCode(code)
+            runCatching { cartRepository.preview() }
+                .onSuccess { preview ->
+                    _uiState.update {
+                        it.copy(
+                            preview = preview,
+                            isApplyingVoucher = false,
+                            voucherError = null,
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    // Voucher is invalid — roll back the code so future calls don't carry it
+                    cartRepository.setVoucherCode(null)
+                    _uiState.update {
+                        it.copy(
+                            isApplyingVoucher = false,
+                            voucherError = e.userMessage("Kode voucher tidak valid."),
+                        )
+                    }
+                }
+        }
+    }
+
+    fun removeVoucher() {
+        cartRepository.setVoucherCode(null)
+        _uiState.update { it.copy(voucherInput = "", voucherError = null) }
         refresh()
     }
 
