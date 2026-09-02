@@ -94,7 +94,13 @@ fun EditProfileScreen(
                 is ProfileUpdateEvent.Loading -> isSaving = true
                 is ProfileUpdateEvent.Success -> {
                     isSaving = false
-                    onSaved()
+                    // Tampilkan konfirmasi dulu sebelum kembali, supaya user tidak
+                    // bingung apakah perubahan tersimpan atau tidak (sebelumnya
+                    // layar langsung ditutup tanpa pemberitahuan apa pun).
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Profil berhasil diperbarui.")
+                        onSaved()
+                    }
                 }
                 is ProfileUpdateEvent.Error -> {
                     isSaving = false

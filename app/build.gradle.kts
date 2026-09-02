@@ -39,8 +39,8 @@ android {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.0.4"
+        versionCode = 12
+        versionName = "1.0.6"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
         // Google ID tokens requested on Android must use this as the audience so the backend can verify them.
@@ -80,6 +80,10 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
+            }
+            ndk {
+                // Upload native debug symbols to Google Play so crashes/ANRs can be symbolicated.
+                debugSymbolLevel = "FULL"
             }
         }
     }
