@@ -1,0 +1,112 @@
+appId: com.mulaisekarang.app
+name: E2E Chat 2 Users Interaction
+---
+# Part 1: Student logs in and sends message
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "email_input"
+- tapOn:
+    id: "email_input"
+- inputText: "siswa1@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "password"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible:
+      id: "nav_tab_beranda"
+    timeout: 10000
+
+- tapOn:
+    id: "nav_tab_chat"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 5000
+
+# We don't know the exact name, so we just tap the first conversation or use text if we know
+- tapOn:
+    point: 50%, 20%
+- extendedWaitUntil:
+    visible: "Tulis pesan..."
+    timeout: 5000
+
+- tapOn: "Tulis pesan..."
+- inputText: "Halo Budi, ini pesan otomatis dari test."
+- tapOn: "Kirim"
+
+- extendedWaitUntil:
+    visible: "Halo Budi, ini pesan otomatis dari test."
+    timeout: 5000
+
+# Part 2: Instructor logs in and replies
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "email_input"
+- tapOn:
+    id: "email_input"
+- inputText: "budi@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "password"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+
+# Wait for Beranda
+- extendedWaitUntil:
+    visible:
+      id: "nav_tab_beranda"
+    timeout: 10000
+
+- tapOn:
+    id: "nav_chat"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 5000
+
+- tapOn:
+    point: 50%, 20%
+- extendedWaitUntil:
+    visible: "Halo Budi, ini pesan otomatis dari test."
+    timeout: 5000
+
+- tapOn: "Tulis pesan..."
+- inputText: "Halo Siswa, pesan diterima dengan baik."
+- tapOn: "Kirim"
+
+- extendedWaitUntil:
+    visible: "Halo Siswa, pesan diterima dengan baik."
+    timeout: 5000
+
+# Part 3: Student verifies reply
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "siswa1@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "password"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible:
+      id: "nav_tab_beranda"
+    timeout: 10000
+
+- tapOn:
+    id: "nav_tab_chat"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 5000
+
+- tapOn:
+    point: 50%, 20%
+- extendedWaitUntil:
+    visible: "Halo Siswa, pesan diterima dengan baik."
+    timeout: 5000
