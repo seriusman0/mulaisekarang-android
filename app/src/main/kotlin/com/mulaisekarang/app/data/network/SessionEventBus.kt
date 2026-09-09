@@ -11,8 +11,15 @@ class SessionEventBus @Inject constructor() {
     private val _events = MutableSharedFlow<Unit>(replay = 0, extraBufferCapacity = 1)
     val events: SharedFlow<Unit> = _events.asSharedFlow()
 
+    private val _maintenanceEvents = MutableSharedFlow<Unit>(replay = 0, extraBufferCapacity = 1)
+    val maintenanceEvents: SharedFlow<Unit> = _maintenanceEvents.asSharedFlow()
+
     /** Non-suspending: called from an OkHttp interceptor thread, not a coroutine. */
     fun notifySessionExpired() {
         _events.tryEmit(Unit)
+    }
+
+    fun notifyMaintenanceMode() {
+        _maintenanceEvents.tryEmit(Unit)
     }
 }

@@ -75,7 +75,7 @@ class AuthViewModel @Inject constructor(
                 .onSuccess { setLoggedIn(it) }
                 .onFailure {
                     crashReporter.logNonFatal("login_failed", it)
-                    _uiState.value = AuthUiState.Error(it.message ?: "Login gagal.")
+                    _uiState.value = AuthUiState.Error(it.userMessage("Login gagal."))
                 }
         }
     }
@@ -85,7 +85,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.register(firstName, lastName, username, email, password) }
                 .onSuccess { setLoggedIn(it) }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Registrasi gagal.") }
+                .onFailure { _uiState.value = AuthUiState.Error(it.userMessage("Registrasi gagal.")) }
         }
     }
 
@@ -94,7 +94,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.loginWithGoogle(idToken) }
                 .onSuccess { setLoggedIn(it) }
-                .onFailure { _uiState.value = AuthUiState.Error(it.message ?: "Google sign-in gagal.") }
+                .onFailure { _uiState.value = AuthUiState.Error(it.userMessage("Google sign-in gagal.")) }
         }
     }
 

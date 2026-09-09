@@ -63,6 +63,8 @@ class MainActivity : ComponentActivity() {
             var showUpdateDialog by remember { mutableStateOf(false) }
             val scope = rememberCoroutineScope()
 
+            var isMaintenanceMode by remember { mutableStateOf(false) }
+
             LaunchedEffect(Unit) {
                 // Play Store owns updates for Play-installed builds; the in-app APK
                 // self-updater is only relevant for direct/sideload distribution.
@@ -76,6 +78,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            LaunchedEffect(Unit) {
+                sessionEventBus.maintenanceEvents.collect {
+                    isMaintenanceMode = true
+                }
+            }
+
             MulaiSekarangTheme(darkTheme = isSystemInDarkTheme()) {
                 Surface(
                     modifier = Modifier
@@ -83,11 +91,19 @@ class MainActivity : ComponentActivity() {
                         .semantics { testTagsAsResourceId = true },
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    MulaiSekarangNavGraph(
-                        sessionEventBus = sessionEventBus,
-                        deepLink = pendingDeepLink,
-                        onDeepLinkConsumed = { pendingDeepLink = null },
-                    )
+                    if (isMaintenanceMode) {
+                        com.mulaisekarang.app.ui.screens.MaintenanceScreen(
+                            onRetry = {
+                                isMaintenanceMode = false
+                            }
+                        )
+                    } else {
+                        MulaiSekarangNavGraph(
+                            sessionEventBus = sessionEventBus,
+                            deepLink = pendingDeepLink,
+                            onDeepLinkConsumed = { pendingDeepLink = null },
+                        )
+                    }
 
                     if (showUpdateDialog && updateInfo != null) {
                         val required = updateInfo?.updateRequired == true

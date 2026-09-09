@@ -33,6 +33,12 @@ fun Throwable.userMessage(fallback: String): String = when {
     }.getOrNull()?.let { body ->
         body.errors?.values?.flatten()?.firstOrNull() ?: body.message
     } ?: fallback
-    this is HttpException && code() >= 500 -> "Terjadi gangguan pada server, coba lagi nanti."
-    else -> message ?: fallback
+    this is HttpException && code() >= 500 -> "Server sedang offline atau dalam pemeliharaan. Silakan coba beberapa saat lagi."
+    this is java.net.UnknownHostException -> "Tidak ada koneksi internet atau server offline. Periksa koneksi Anda dan coba lagi."
+    this is java.net.ConnectException -> "Gagal terhubung ke server. Sistem mungkin sedang offline."
+    this is java.net.SocketTimeoutException -> "Koneksi terputus karena server tidak merespons. Silakan coba lagi."
+    else -> {
+        val msg = message ?: fallback
+        if (msg.contains("530")) "Server sedang offline atau dalam pemeliharaan. Silakan coba beberapa saat lagi." else msg
+    }
 }
