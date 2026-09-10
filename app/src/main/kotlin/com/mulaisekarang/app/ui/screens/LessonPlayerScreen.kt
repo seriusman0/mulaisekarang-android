@@ -73,6 +73,23 @@ fun LessonPlayerScreen(
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Kembali")
                     }
                 },
+                actions = {
+                    if (uiState is LessonPlayerUiState.Loaded) {
+                        val state = uiState as LessonPlayerUiState.Loaded
+                        if (state.isDownloaded) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = "Tersedia Offline",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        } else {
+                            Button(onClick = { viewModel.downloadLesson() }, modifier = Modifier.padding(end = 8.dp)) {
+                                Text("Unduh")
+                            }
+                        }
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },

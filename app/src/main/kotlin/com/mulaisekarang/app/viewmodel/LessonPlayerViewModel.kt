@@ -23,9 +23,11 @@ import kotlinx.coroutines.launch
 sealed interface LessonPlayerUiState {
     data object Loading : LessonPlayerUiState
     data class Loaded(
+        val courseId: Int,
         val lesson: LessonDetail,
         val authToken: String?,
         val startPositionMs: Long,
+        val isDownloaded: Boolean,
     ) : LessonPlayerUiState
     data class Error(val message: String) : LessonPlayerUiState
 }
@@ -42,6 +44,7 @@ class LessonPlayerViewModel @Inject constructor(
     private val tokenStore: TokenStore,
     private val videoProgressStore: VideoProgressStore,
     private val crashReporter: CrashReporter,
+    private val offlineRepository: com.mulaisekarang.app.data.OfflineRepository,
     val videoCache: Cache,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -65,9 +68,14 @@ class LessonPlayerViewModel @Inject constructor(
                 val token = tokenStore.currentToken()
                 val lesson = lessonRepository.lessonDetail(courseId, lessonId)
                 val startPosition = videoProgressStore.lastPositionMs(lessonId)
-                Triple(lesson, token, startPosition)
+                val downloaded = offlineRepository.getDownloadedLesson(lessonId)
+                val effectiveLesson = if (downloaded != null) {
+                    lesson.copy(videoStreamUrl = "file://" + downloaded.localPath)
+                } else lesson
+                Triple(effectiveLesson, token, startPosition)
             }.onSuccess { (lesson, token, startPosition) ->
-                _uiState.value = LessonPlayerUiState.Loaded(lesson, token, startPosition)
+                val isDownloaded = offlineRepository.getDownloadedLesson(lessonId) != null
+                _uiState.value = LessonPlayerUiState.Loaded(courseId, lesson, token, startPosition, isDownloaded)
             }.onFailure { e ->
                 _uiState.value = LessonPlayerUiState.Error(e.message ?: "Gagal memuat pelajaran.")
             }
@@ -76,7 +84,14 @@ class LessonPlayerViewModel @Inject constructor(
 
     /** Called periodically and on dispose by the player so progress survives backgrounding. */
     fun savePlaybackPosition(positionMs: Long) {
-        viewModelScope.launch { videoProgressStore.savePositionMs(lessonId, positionMs) }
+        viewModelScope.launch { 
+            videoProgressStore.savePositionMs(lessonId, positionMs)
+            val lessonDurationMs = (uiState.value as? LessonPlayerUiState.Loaded)?.lesson?.let { 
+                (it.durationHours * 3600 + it.durationMinutes * 60 + it.durationSeconds) * 1000L
+            } ?: 0L
+            val isCompleted = lessonDurationMs > 0 && positionMs >= lessonDurationMs * 0.9
+            offlineRepository.recordProgress(courseId, lessonId, (positionMs / 1000).toInt(), isCompleted)
+        }
     }
 
     fun reportPlaybackError(error: Throwable) {
@@ -101,5 +116,9 @@ class LessonPlayerViewModel @Inject constructor(
                 }
             _completing.update { false }
         }
+    }
+
+    fun downloadLesson() {
+        offlineRepository.startDownload(courseId, lessonId)
     }
 }
