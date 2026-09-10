@@ -32,6 +32,7 @@ fun VideoPlayer(
     streamUrl: String,
     authToken: String?,
     videoCache: Cache,
+    lessonId: Int = 0, // Added for decryption
     modifier: Modifier = Modifier,
     startPositionMs: Long = 0L,
     onPositionChanged: (Long) -> Unit = {},
@@ -47,12 +48,20 @@ fun VideoPlayer(
                 setDefaultRequestProperties(mapOf("Authorization" to "Bearer $authToken"))
             }
         }
-        // Cache-backed data source: chunks already played (or pre-buffered
-        // while the student reads the lesson description) persist to disk,
-        // so replays and revisits don't re-download the same bytes.
+        
+        // Custom DataSource factory that decrypts local files
+        val customDataSourceFactory = androidx.media3.datasource.DataSource.Factory {
+            if (streamUrl.startsWith("file://")) {
+                com.mulaisekarang.app.util.EncryptedFileDataSource(lessonId)
+            } else {
+                androidx.media3.datasource.DefaultDataSource.Factory(context, httpDataSourceFactory).createDataSource()
+            }
+        }
+
+        // Cache-backed data source
         val cacheDataSourceFactory = CacheDataSource.Factory()
             .setCache(videoCache)
-            .setUpstreamDataSourceFactory(DefaultDataSource.Factory(context, httpDataSourceFactory))
+            .setUpstreamDataSourceFactory(customDataSourceFactory)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
         ExoPlayer.Builder(context)

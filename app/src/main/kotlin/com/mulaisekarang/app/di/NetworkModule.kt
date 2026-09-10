@@ -59,4 +59,16 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService = retrofit.create()
+
+    @Provides
+    @Singleton
+    fun provideOfflineApiService(client: OkHttpClient, json: Json): com.mulaisekarang.app.data.network.OfflineApiService {
+        val contentType = "application/json".toMediaType()
+        val retrofitV2 = Retrofit.Builder()
+            .baseUrl("https://mulaisekarang.com/api/v2/mobile/")
+            .client(client)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+        return retrofitV2.create(com.mulaisekarang.app.data.network.OfflineApiService::class.java)
+    }
 }

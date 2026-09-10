@@ -100,6 +100,7 @@ fun LessonPlayerScreen(
                             streamUrl = it,
                             authToken = state.authToken,
                             videoCache = viewModel.videoCache,
+                            lessonId = lesson.id,
                             startPositionMs = state.startPositionMs,
                             onPositionChanged = { positionMs -> viewModel.savePlaybackPosition(positionMs) },
                             onPlaybackError = { error -> viewModel.reportPlaybackError(error) },

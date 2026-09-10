@@ -16,17 +16,18 @@ appId: com.mulaisekarang.app
     timeout: 10000
 
 # Lakukan navigasi dan fitur dasar
-- tapOn: "Katalog"
+- tapOn: "BELANJA"
 - extendedWaitUntil:
-    visible: "Cari kelas"
+    visible: "Cari kursus atau keahlian baru..."
     timeout: 5000
 
-- tapOn: "Profil"
-- extendedWaitUntil:
-    visible: "Keluar"
-    timeout: 5000
-- tapOn: "Keluar"
+- tapOn: "AKUN"
+- scrollUntilVisible:
+    element:
+      text: ".*Keluar.*"
+    direction: DOWN
+- tapOn: ".*Keluar.*"
 
 - extendedWaitUntil:
-    visible: "Masuk ke Akun Anda"
+    visible: "Selamat Datang"
     timeout: 5000

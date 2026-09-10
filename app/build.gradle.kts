@@ -171,6 +171,11 @@ dependencies {
     implementation("androidx.paging:paging-runtime-ktx:3.3.0")
     implementation("androidx.paging:paging-compose:3.3.0")
 
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.media3:media3-datasource-okhttp:1.4.1")
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     if (hasGoogleServices) {

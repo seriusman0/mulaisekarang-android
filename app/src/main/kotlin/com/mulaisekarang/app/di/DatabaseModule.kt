@@ -21,8 +21,18 @@ object DatabaseModule {
     fun provideAppDatabase(@ApplicationContext context: Context, converters: Converters): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "mulaisekarang.db")
             .addTypeConverter(converters)
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides
     fun provideCourseDao(database: AppDatabase): CourseDao = database.courseDao()
+
+    @Provides
+    fun provideOfflineSyncQueueDao(database: AppDatabase) = database.offlineSyncQueueDao()
+
+    @Provides
+    fun provideDownloadedLessonDao(database: AppDatabase) = database.downloadedLessonDao()
+
+    @Provides
+    fun provideCachedCourseDao(database: AppDatabase) = database.cachedCourseDao()
 }
