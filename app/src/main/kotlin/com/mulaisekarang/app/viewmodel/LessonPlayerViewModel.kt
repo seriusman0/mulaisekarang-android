@@ -64,18 +64,40 @@ class LessonPlayerViewModel @Inject constructor(
     fun load() {
         _uiState.value = LessonPlayerUiState.Loading
         viewModelScope.launch {
-            runCatching {
-                val token = tokenStore.currentToken()
-                val lesson = lessonRepository.lessonDetail(courseId, lessonId)
-                val startPosition = videoProgressStore.lastPositionMs(lessonId)
-                val downloaded = offlineRepository.getDownloadedLesson(lessonId)
+            val startPosition = videoProgressStore.lastPositionMs(lessonId)
+            val downloaded = offlineRepository.getDownloadedLesson(lessonId)
+            val token = runCatching { tokenStore.currentToken() }.getOrNull()
+
+            val lessonResult = runCatching {
+                lessonRepository.lessonDetail(courseId, lessonId)
+            }.recoverCatching { e ->
+                if (downloaded != null) {
+                    val manifest = offlineRepository.getCachedCourseManifest(courseId)
+                    val lessonManifest = manifest?.course?.topics?.flatMap { it.lessons }?.find { it.id == lessonId }
+                    if (lessonManifest != null) {
+                        return@recoverCatching LessonDetail(
+                            id = lessonManifest.id,
+                            title = lessonManifest.title,
+                            content = null,
+                            durationHours = lessonManifest.durationHours,
+                            durationMinutes = lessonManifest.durationMinutes,
+                            durationSeconds = lessonManifest.durationSeconds,
+                            allowPreview = false,
+                            isAccessible = true,
+                            isCompleted = lessonManifest.isCompleted,
+                            videoStreamUrl = "file://" + downloaded.localPath
+                        )
+                    }
+                }
+                throw e
+            }
+
+            lessonResult.onSuccess { lesson ->
                 val effectiveLesson = if (downloaded != null) {
                     lesson.copy(videoStreamUrl = "file://" + downloaded.localPath)
                 } else lesson
-                Triple(effectiveLesson, token, startPosition)
-            }.onSuccess { (lesson, token, startPosition) ->
-                val isDownloaded = offlineRepository.getDownloadedLesson(lessonId) != null
-                _uiState.value = LessonPlayerUiState.Loaded(courseId, lesson, token, startPosition, isDownloaded)
+                val isDownloaded = downloaded != null
+                _uiState.value = LessonPlayerUiState.Loaded(courseId, effectiveLesson, token, startPosition, isDownloaded)
             }.onFailure { e ->
                 _uiState.value = LessonPlayerUiState.Error(e.message ?: "Gagal memuat pelajaran.")
             }
