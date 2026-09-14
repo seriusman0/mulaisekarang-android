@@ -41,7 +41,7 @@ class NewGroupViewModel @Inject constructor(private val repository: ChatReposito
         _uiState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             runCatching { repository.eligibleContacts() }
-                .onSuccess { contacts -> _uiState.update { it.copy(contacts = contacts, isLoading = false) } }
+                .onSuccess { response -> _uiState.update { it.copy(contacts = response.data, isLoading = false) } }
                 .onFailure { e -> _uiState.update { it.copy(isLoading = false, error = e.userMessage("Gagal memuat daftar kontak.")) } }
         }
     }
@@ -59,15 +59,25 @@ class NewGroupViewModel @Inject constructor(private val repository: ChatReposito
 
     fun createGroup() {
         val state = _uiState.value
-        if (state.title.isBlank() || state.selectedUsernames.isEmpty()) return
+        if (state.selectedUsernames.isEmpty()) return
+        
+        val isDirect = state.selectedUsernames.size == 1 && state.title.isBlank()
+        if (!isDirect && state.title.isBlank()) return // require title for groups
+
         _uiState.update { it.copy(isCreating = true, error = null) }
         viewModelScope.launch {
-            runCatching { repository.createGroup(state.title, state.selectedUsernames.toList()) }
+            runCatching { 
+                if (isDirect) {
+                    repository.startDirectConversation(state.selectedUsernames.first())
+                } else {
+                    repository.createGroup(state.title, state.selectedUsernames.toList())
+                }
+            }
                 .onSuccess { conversation ->
                     _uiState.update { it.copy(isCreating = false) }
                     _createdEvent.emit(conversation.id)
                 }
-                .onFailure { e -> _uiState.update { it.copy(isCreating = false, error = e.userMessage("Gagal membuat grup.")) } }
+                .onFailure { e -> _uiState.update { it.copy(isCreating = false, error = e.userMessage(if(isDirect) "Gagal memulai chat." else "Gagal membuat grup.")) } }
         }
     }
 }

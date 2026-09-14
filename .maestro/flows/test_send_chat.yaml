@@ -1,0 +1,45 @@
+appId: com.mulaisekarang.app
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "qa-student@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "QaMobile#2026"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "Beranda"
+    timeout: 10000
+
+- tapOn: "CHAT"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 5000
+
+- tapOn: "Buat Grup Baru"
+- extendedWaitUntil:
+    visible: "Grup Baru"
+    timeout: 5000
+
+# Do NOT input title, just select contact
+
+- tapOn:
+    id: "contact_checkbox"
+    index: 0
+
+- tapOn: "Mulai Chat"
+
+- extendedWaitUntil:
+    visible: "Tulis pesan..."
+    timeout: 5000
+
+- tapOn: "Tulis pesan..."
+- inputText: "Halo! Ini pesan direct message."
+- tapOn: "Kirim"
+- extendedWaitUntil:
+    visible: "Halo! Ini pesan direct message."
+    timeout: 5000

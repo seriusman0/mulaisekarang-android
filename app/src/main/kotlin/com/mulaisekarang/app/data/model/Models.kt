@@ -439,6 +439,14 @@ data class ConversationResponse(
 )
 
 @Serializable
+data class Attachment(
+    val url: String,
+    val mime: String,
+    @SerialName("is_image") val isImage: Boolean,
+    val size: Int,
+)
+
+@Serializable
 data class ChatMessage(
     val id: Int,
     @SerialName("conversation_id") val conversationId: Int,
@@ -446,6 +454,7 @@ data class ChatMessage(
     @SerialName("sender_name") val senderName: String? = null,
     @SerialName("is_mine") val isMine: Boolean,
     val body: String? = null,
+    val attachment: Attachment? = null,
     @SerialName("created_at") val createdAt: String,
 )
 
@@ -473,6 +482,7 @@ data class CreateGroupRequest(
 @Serializable
 data class EligibleContactsResponse(
     val data: List<Mentor>,
+    val meta: PaginationMeta? = null,
 )
 
 @Serializable

@@ -1,5 +1,7 @@
 package com.mulaisekarang.app.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,6 +11,9 @@ import com.mulaisekarang.app.data.model.Conversation
 import com.mulaisekarang.app.data.network.isChatPaywall
 import com.mulaisekarang.app.data.network.userMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -51,7 +56,9 @@ class ChatConversationViewModel @Inject constructor(
     val paywallRequired: SharedFlow<Unit> = _paywallRequired.asSharedFlow()
 
     private var pollingJob: Job? = null
-    private var isSending = false
+    
+    private val _isSending = MutableStateFlow(false)
+    val isSending: StateFlow<Boolean> = _isSending.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -86,8 +93,8 @@ class ChatConversationViewModel @Inject constructor(
     }
 
     fun sendMessage(body: String) {
-        if (body.isBlank() || isSending) return
-        isSending = true
+        if (body.isBlank() || _isSending.value) return
+        _isSending.value = true
         viewModelScope.launch {
             runCatching { repository.sendMessage(conversationId, body) }
                 .onSuccess { refresh() }
@@ -100,7 +107,34 @@ class ChatConversationViewModel @Inject constructor(
                         _sendError.emit(e.userMessage("Pesan gagal terkirim."))
                     }
                 }
-            isSending = false
+            _isSending.value = false
+        }
+    }
+
+    fun sendAttachment(uri: Uri, context: Context, bodyText: String) {
+        if (_isSending.value) return
+        _isSending.value = true
+        viewModelScope.launch {
+            runCatching {
+                val filePart = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val bytes = inputStream.readBytes()
+                    val requestBody = bytes.toRequestBody("application/octet-stream".toMediaTypeOrNull(), 0, bytes.size)
+                    MultipartBody.Part.createFormData("file", "attachment", requestBody)
+                } ?: throw Exception("Cannot read file")
+                
+                val fields = mutableMapOf<String, okhttp3.RequestBody>()
+                if (bodyText.isNotBlank()) {
+                    fields["body"] = bodyText.toRequestBody("text/plain".toMediaTypeOrNull())
+                }
+                
+                repository.sendAttachment(conversationId, fields, filePart)
+            }
+                .onSuccess { refresh() }
+                .onFailure { e ->
+                    if (e.isChatPaywall()) _paywallRequired.emit(Unit)
+                    else _sendError.emit(e.userMessage("Gagal mengunggah file."))
+                }
+            _isSending.value = false
         }
     }
 

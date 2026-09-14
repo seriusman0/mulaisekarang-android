@@ -23,6 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -42,6 +44,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.AttachFile
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -61,6 +67,7 @@ fun ChatConversationScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val conversation by viewModel.conversation.collectAsState()
+    val isSending by viewModel.isSending.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, viewModel) {
@@ -80,6 +87,15 @@ fun ChatConversationScreen(
 
     var draft by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        if (uri != null) {
+            viewModel.sendAttachment(uri, context, draft)
+            draft = ""
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.sendError.collect { message -> snackbarHostState.showSnackbar(message) }
@@ -160,11 +176,20 @@ fun ChatConversationScreen(
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                IconButton(
+                    onClick = { launcher.launch("*/*") },
+                    modifier = Modifier.padding(end = 4.dp),
+                    enabled = !isSending
+                ) {
+                    Icon(androidx.compose.material.icons.Icons.Filled.AttachFile, contentDescription = "Upload")
+                }
+                
                 OutlinedTextField(
                     value = draft,
                     onValueChange = { draft = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Tulis pesan...") },
+                    placeholder = { Text(if (isSending) "Mengirim..." else "Tulis pesan...") },
+                    enabled = !isSending,
                     shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         unfocusedBorderColor = Color.Transparent,
@@ -173,16 +198,27 @@ fun ChatConversationScreen(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     ),
                 )
-                IconButton(
-                    onClick = {
-                        if (draft.isNotBlank()) {
-                            viewModel.sendMessage(draft)
-                            draft = ""
-                        }
-                    },
-                    modifier = Modifier.padding(start = 4.dp),
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Kirim", tint = Color(0xFF3498DB))
+                
+                if (isSending) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .padding(start = 12.dp, end = 12.dp)
+                            .size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = Color(0xFF3498DB)
+                    )
+                } else {
+                    IconButton(
+                        onClick = {
+                            if (draft.isNotBlank()) {
+                                viewModel.sendMessage(draft)
+                                draft = ""
+                            }
+                        },
+                        modifier = Modifier.padding(start = 4.dp),
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Kirim", tint = Color(0xFF3498DB))
+                    }
                 }
             }
         }
@@ -228,7 +264,32 @@ private fun MessageBubble(message: ChatMessage, isAiTutor: Boolean = false, show
                     modifier = Modifier.padding(bottom = 2.dp),
                 )
             }
-            Text(message.body ?: "", color = textColor, style = MaterialTheme.typography.bodyMedium)
+            
+            if (message.attachment != null) {
+                if (message.attachment.isImage) {
+                    AsyncImage(
+                        model = message.attachment.url,
+                        contentDescription = "Gambar terlampir",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = if (message.body.isNullOrBlank()) 0.dp else 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                    )
+                } else {
+                    Text(
+                        "📎 File terlampir",
+                        color = textColor,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = if (message.body.isNullOrBlank()) 0.dp else 4.dp)
+                    )
+                }
+            }
+            
+            if (!message.body.isNullOrBlank()) {
+                Text(message.body, color = textColor, style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }

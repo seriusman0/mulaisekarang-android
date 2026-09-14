@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import coil.compose.AsyncImage
 import com.mulaisekarang.app.data.model.Mentor
 import com.mulaisekarang.app.ui.components.EmptyState
@@ -112,15 +114,18 @@ fun NewGroupScreen(
                 )
             }
 
+            val isDirect = uiState.selectedUsernames.size == 1 && uiState.title.isBlank()
+            val canSubmit = !uiState.isCreating && (isDirect || (uiState.title.isNotBlank() && uiState.selectedUsernames.isNotEmpty()))
+
             Button(
                 onClick = { viewModel.createGroup() },
-                enabled = !uiState.isCreating && uiState.title.isNotBlank() && uiState.selectedUsernames.isNotEmpty(),
+                enabled = canSubmit,
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
             ) {
-                Text("Buat Grup")
+                Text(if (isDirect) "Mulai Chat" else "Buat Grup")
             }
         }
     }
@@ -144,6 +149,12 @@ private fun ContactRow(contact: Mentor, selected: Boolean, onToggle: () -> Unit)
             )
         },
         headlineContent = { Text(contact.displayName) },
-        trailingContent = { Checkbox(checked = selected, onCheckedChange = { onToggle() }) },
+        trailingContent = { 
+            Checkbox(
+                checked = selected, 
+                onCheckedChange = { onToggle() },
+                modifier = Modifier.semantics { testTag = "contact_checkbox" }
+            ) 
+        },
     )
 }

@@ -181,9 +181,16 @@ interface ApiService {
 
     @POST("chat/conversations")
     suspend fun startConversation(@Body body: StartConversationRequest): ConversationResponse
+    
+    @POST("chat/conversations/direct")
+    suspend fun startDirectConversation(@Body body: StartConversationRequest): ConversationResponse
 
     @GET("chat/eligible-contacts")
-    suspend fun eligibleContacts(): EligibleContactsResponse
+    suspend fun eligibleContacts(
+        @Query("search") search: String? = null,
+        @Query("per_page") perPage: Int = 20,
+        @Query("page") page: Int = 1,
+    ): EligibleContactsResponse
 
     @POST("chat/groups")
     suspend fun createGroup(@Body body: CreateGroupRequest): ConversationResponse
@@ -193,6 +200,14 @@ interface ApiService {
 
     @POST("chat/conversations/{id}/messages")
     suspend fun sendMessage(@Path("id") conversationId: Int, @Body body: SendMessageRequest): SendMessageResponse
+
+    @Multipart
+    @POST("chat/conversations/{id}/attachments")
+    suspend fun sendAttachment(
+        @Path("id") conversationId: Int,
+        @PartMap fields: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part file: MultipartBody.Part
+    ): SendMessageResponse
 
     // ---- Student / subscriber (see ../mulaisekarang/fdd/api/student-api.md) ----
 

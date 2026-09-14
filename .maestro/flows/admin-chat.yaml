@@ -1,0 +1,21 @@
+appId: com.mulaisekarang.app
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "email_input"
+- inputText: "admin@mulaisekarang.com"
+- tapOn:
+    id: "password_input"
+- inputText: "591VVrJdrhHy7tBQ"
+- hideKeyboard
+- tapOn:
+    id: "login_button"
+- extendedWaitUntil:
+    visible: "BERANDA"
+    timeout: 10000
+
+- tapOn: "CHAT"
+- extendedWaitUntil:
+    visible: "Chat"
+    timeout: 5000
