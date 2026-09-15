@@ -22,12 +22,20 @@ class LessonPlayerViewModelTest {
 
     private val lessonRepository: LessonRepository = mockk()
     private val tokenStore: TokenStore = mockk()
+    private val videoProgressStore: com.mulaisekarang.app.data.VideoProgressStore = mockk(relaxed = true)
+    private val crashReporter: com.mulaisekarang.app.util.CrashReporter = mockk(relaxed = true)
+    private val offlineRepository: com.mulaisekarang.app.data.OfflineRepository = mockk(relaxed = true)
+    private val videoCache: androidx.media3.datasource.cache.Cache = mockk(relaxed = true)
 
     private fun viewModel(): LessonPlayerViewModel {
         coEvery { tokenStore.currentToken() } returns "token"
         return LessonPlayerViewModel(
             lessonRepository,
             tokenStore,
+            videoProgressStore,
+            crashReporter,
+            offlineRepository,
+            videoCache,
             SavedStateHandle(mapOf("courseId" to 1, "lessonId" to 2)),
         )
     }

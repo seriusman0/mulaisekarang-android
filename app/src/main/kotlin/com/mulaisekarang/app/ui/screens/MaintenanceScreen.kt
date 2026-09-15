@@ -49,7 +49,7 @@ fun MaintenanceScreen(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Server sedang offline atau kami sedang melakukan pemeliharaan rutin untuk meningkatkan layanan. Silakan coba beberapa saat lagi.",
+            text = "Server sedang offline atau kami sedang melakukan pemeliharaan rutin untuk meningkatkan layanan. Perangkat Anda mungkin juga tidak terhubung ke internet. Silakan periksa koneksi Anda dan coba beberapa saat lagi.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
