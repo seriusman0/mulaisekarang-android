@@ -11,9 +11,15 @@ import com.mulaisekarang.app.data.model.Conversation
 import com.mulaisekarang.app.data.network.isChatPaywall
 import com.mulaisekarang.app.data.network.userMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSink
+import okio.ForwardingSink
+import okio.Sink
+import okio.buffer
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,6 +34,32 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 private const val POLL_INTERVAL_MS = 4000L
+
+class ProgressRequestBody(
+    private val delegate: RequestBody,
+    private val onProgressUpdate: (Int) -> Unit
+) : RequestBody() {
+    override fun contentType(): MediaType? = delegate.contentType()
+    override fun contentLength(): Long = delegate.contentLength()
+    override fun writeTo(sink: BufferedSink) {
+        val countingSink = CountingSink(sink)
+        val bufferedSink = countingSink.buffer()
+        delegate.writeTo(bufferedSink)
+        bufferedSink.flush()
+    }
+    private inner class CountingSink(delegate: Sink) : ForwardingSink(delegate) {
+        private var bytesWritten = 0L
+        private val contentLength = contentLength()
+        override fun write(source: okio.Buffer, byteCount: Long) {
+            super.write(source, byteCount)
+            bytesWritten += byteCount
+            if (contentLength > 0) {
+                val progress = ((bytesWritten.toFloat() / contentLength) * 100).toInt()
+                onProgressUpdate(progress)
+            }
+        }
+    }
+}
 
 sealed interface ChatConversationUiState {
     data object Loading : ChatConversationUiState
@@ -59,6 +91,9 @@ class ChatConversationViewModel @Inject constructor(
     
     private val _isSending = MutableStateFlow(false)
     val isSending: StateFlow<Boolean> = _isSending.asStateFlow()
+
+    private val _uploadProgress = MutableStateFlow<Int?>(null)
+    val uploadProgress: StateFlow<Int?> = _uploadProgress.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -114,12 +149,16 @@ class ChatConversationViewModel @Inject constructor(
     fun sendAttachment(uri: Uri, context: Context, bodyText: String) {
         if (_isSending.value) return
         _isSending.value = true
+        _uploadProgress.value = 0
         viewModelScope.launch {
             runCatching {
                 val filePart = context.contentResolver.openInputStream(uri)?.use { inputStream ->
                     val bytes = inputStream.readBytes()
                     val requestBody = bytes.toRequestBody("application/octet-stream".toMediaTypeOrNull(), 0, bytes.size)
-                    MultipartBody.Part.createFormData("file", "attachment", requestBody)
+                    val progressBody = ProgressRequestBody(requestBody) { progress ->
+                        _uploadProgress.value = progress
+                    }
+                    MultipartBody.Part.createFormData("file", "attachment", progressBody)
                 } ?: throw Exception("Cannot read file")
                 
                 val fields = mutableMapOf<String, okhttp3.RequestBody>()
@@ -135,6 +174,7 @@ class ChatConversationViewModel @Inject constructor(
                     else _sendError.emit(e.userMessage("Gagal mengunggah file."))
                 }
             _isSending.value = false
+            _uploadProgress.value = null
         }
     }
 

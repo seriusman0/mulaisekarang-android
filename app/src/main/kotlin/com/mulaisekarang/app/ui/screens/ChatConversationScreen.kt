@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.AttachFile
 import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.mulaisekarang.app.data.model.ChatMessage
@@ -68,6 +69,7 @@ fun ChatConversationScreen(
     val uiState by viewModel.uiState.collectAsState()
     val conversation by viewModel.conversation.collectAsState()
     val isSending by viewModel.isSending.collectAsState()
+    val uploadProgress by viewModel.uploadProgress.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, viewModel) {
@@ -200,13 +202,30 @@ fun ChatConversationScreen(
                 )
                 
                 if (isSending) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .padding(start = 12.dp, end = 12.dp)
-                            .size(24.dp),
-                        strokeWidth = 2.dp,
-                        color = Color(0xFF3498DB)
-                    )
+                    if (uploadProgress != null) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
+                            CircularProgressIndicator(
+                                progress = { uploadProgress!! / 100f },
+                                modifier = Modifier.size(36.dp),
+                                strokeWidth = 2.dp,
+                                color = Color(0xFF3498DB),
+                                trackColor = Color(0xFFEAEAEA)
+                            )
+                            Text(
+                                text = "${uploadProgress}%",
+                                style = androidx.compose.ui.text.TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                color = Color(0xFF3498DB)
+                            )
+                        }
+                    } else {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(start = 12.dp, end = 12.dp)
+                                .size(24.dp),
+                            strokeWidth = 2.dp,
+                            color = Color(0xFF3498DB)
+                        )
+                    }
                 } else {
                     IconButton(
                         onClick = {
