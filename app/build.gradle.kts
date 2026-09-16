@@ -39,7 +39,7 @@ android {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 13
+        versionCode = 14
         versionName = "1.0.7"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
