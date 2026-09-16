@@ -95,6 +95,9 @@ class ChatConversationViewModel @Inject constructor(
     private val _uploadProgress = MutableStateFlow<Int?>(null)
     val uploadProgress: StateFlow<Int?> = _uploadProgress.asStateFlow()
 
+    private val _typingIndicator = MutableStateFlow<String?>(null)
+    val typingIndicator: StateFlow<String?> = _typingIndicator.asStateFlow()
+
     init {
         viewModelScope.launch {
             runCatching { repository.conversations() }
@@ -176,6 +179,11 @@ class ChatConversationViewModel @Inject constructor(
             _isSending.value = false
             _uploadProgress.value = null
         }
+    }
+
+    fun onTyping() {
+        // Placeholder for Pusher client sendTypingEvent logic
+        // Panggil sendTypingEvent() setiap kali teks input berubah, tapi debounce minimal 1 detik agar tidak spam.
     }
 
     override fun onCleared() {

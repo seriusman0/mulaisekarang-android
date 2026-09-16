@@ -418,12 +418,19 @@ data class TransactionsResponse(
 )
 
 @Serializable
+data class Participant(
+    @SerialName("user_id") val userId: Int,
+    val role: String,
+    val user: Mentor? = null
+)
+
+@Serializable
 data class Conversation(
     val id: Int,
     val type: String? = "mentor",
     val title: String? = null,
     @SerialName("other_party") val otherParty: Mentor? = null,
-    val participants: List<Mentor>? = null,
+    val participants: List<Participant>? = null,
     @SerialName("last_message_at") val lastMessageAt: String? = null,
     @SerialName("unread_count") val unreadCount: Int = 0,
 )
@@ -447,6 +454,13 @@ data class Attachment(
 )
 
 @Serializable
+data class ReplyMessage(
+    val id: Int,
+    val body: String? = null,
+    val sender: Mentor? = null,
+)
+
+@Serializable
 data class ChatMessage(
     val id: Int,
     @SerialName("conversation_id") val conversationId: Int,
@@ -455,6 +469,8 @@ data class ChatMessage(
     @SerialName("is_mine") val isMine: Boolean,
     val body: String? = null,
     val attachment: Attachment? = null,
+    @SerialName("reply_to_id") val replyToId: Int? = null,
+    @SerialName("reply_to") val replyTo: ReplyMessage? = null,
     @SerialName("created_at") val createdAt: String,
 )
 
@@ -488,6 +504,7 @@ data class EligibleContactsResponse(
 @Serializable
 data class SendMessageRequest(
     val body: String,
+    @SerialName("reply_to_id") val replyToId: Int? = null,
 )
 
 @Serializable
@@ -697,6 +714,22 @@ data class DeletedResponse(val data: DeletedFlag) {
     @Serializable
     data class DeletedFlag(val deleted: Boolean = true)
 }
+
+@Serializable
+data class GroupInviteResponse(
+    @SerialName("invite_url") val inviteUrl: String,
+    @SerialName("expires_at") val expiresAt: String
+)
+
+@Serializable
+data class JoinGroupRequest(
+    val token: String
+)
+
+@Serializable
+data class AddParticipantRequest(
+    val username: String
+)
 
 // ---------------------------------------------------------------------------
 // Student / subscriber surface. See ../mulaisekarang/fdd/api/student-api.md.

@@ -28,6 +28,9 @@ import com.mulaisekarang.app.data.model.CourseDetailResponse
 import com.mulaisekarang.app.data.model.CoursesResponse
 import com.mulaisekarang.app.data.model.CompleteLessonResponse
 import com.mulaisekarang.app.data.model.CreateGroupRequest
+import com.mulaisekarang.app.data.model.AddParticipantRequest
+import com.mulaisekarang.app.data.model.GroupInviteResponse
+import com.mulaisekarang.app.data.model.JoinGroupRequest
 import com.mulaisekarang.app.data.model.DashboardSummaryResponse
 import com.mulaisekarang.app.data.model.EligibleContactsResponse
 import com.mulaisekarang.app.data.model.ForgotPasswordRequest
@@ -194,6 +197,18 @@ interface ApiService {
 
     @POST("chat/groups")
     suspend fun createGroup(@Body body: CreateGroupRequest): ConversationResponse
+
+    @POST("groups/{id}/participants")
+    suspend fun addParticipant(@Path("id") conversationId: Int, @Body body: AddParticipantRequest): ConversationResponse
+
+    @DELETE("groups/{id}/participants/{userId}")
+    suspend fun removeParticipant(@Path("id") conversationId: Int, @Path("userId") userId: Int): MessageResponse
+
+    @POST("groups/{id}/invite")
+    suspend fun generateInviteLink(@Path("id") conversationId: Int): GroupInviteResponse
+
+    @POST("groups/join")
+    suspend fun joinGroup(@Body body: JoinGroupRequest): ConversationResponse
 
     @GET("chat/conversations/{id}/messages")
     suspend fun messages(@Path("id") conversationId: Int): MessagesResponse

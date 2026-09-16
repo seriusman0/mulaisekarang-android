@@ -1,6 +1,7 @@
 package com.mulaisekarang.app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -65,6 +67,7 @@ fun ChatConversationScreen(
     viewModel: ChatConversationViewModel,
     onBack: () -> Unit,
     onChatPaywall: () -> Unit = {},
+    onGroupInfoClick: (Int) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val conversation by viewModel.conversation.collectAsState()
@@ -116,7 +119,12 @@ fun ChatConversationScreen(
                     val current = conversation
                     val isGroup = current?.type == "group"
                     val title = if (isGroup) current?.title ?: "Grup" else current?.otherParty?.displayName ?: "Chat"
-                    Column {
+                    Column(
+                        modifier = Modifier.then(
+                            if (isGroup && current != null) androidx.compose.ui.Modifier.clickable { onGroupInfoClick(current.id) }
+                            else androidx.compose.ui.Modifier
+                        ).padding(vertical = 4.dp, horizontal = 8.dp)
+                    ) {
                         Text(title)
                         if (isGroup) {
                             Text(
@@ -171,6 +179,16 @@ fun ChatConversationScreen(
                     }
                 }
             }
+            
+            val typing by viewModel.typingIndicator.collectAsState()
+            if (typing != null) {
+                Text(
+                    text = typing!!,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
 
             Row(
                 modifier = Modifier
@@ -188,7 +206,10 @@ fun ChatConversationScreen(
                 
                 OutlinedTextField(
                     value = draft,
-                    onValueChange = { draft = it },
+                    onValueChange = { 
+                        draft = it
+                        viewModel.onTyping()
+                    },
                     modifier = Modifier.weight(1f),
                     placeholder = { Text(if (isSending) "Mengirim..." else "Tulis pesan...") },
                     enabled = !isSending,
@@ -282,6 +303,31 @@ private fun MessageBubble(message: ChatMessage, isAiTutor: Boolean = false, show
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 2.dp),
                 )
+            }
+            
+            if (message.replyTo != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color.Black.copy(alpha = 0.1f))
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        message.replyTo.sender?.displayName ?: "User",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor
+                    )
+                    Text(
+                        message.replyTo.body ?: "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                }
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
             }
             
             if (message.attachment != null) {

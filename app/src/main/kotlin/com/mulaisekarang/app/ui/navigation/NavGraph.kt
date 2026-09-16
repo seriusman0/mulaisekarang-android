@@ -67,6 +67,10 @@ import com.mulaisekarang.app.viewmodel.ChatConversationViewModel
 import com.mulaisekarang.app.viewmodel.ChatListViewModel
 import com.mulaisekarang.app.viewmodel.ChatPaywallViewModel
 import com.mulaisekarang.app.viewmodel.CourseDetailViewModel
+import com.mulaisekarang.app.ui.screens.GroupInfoScreen
+import com.mulaisekarang.app.viewmodel.GroupInfoViewModel
+import com.mulaisekarang.app.ui.screens.JoinGroupScreen
+import com.mulaisekarang.app.viewmodel.JoinGroupViewModel
 import com.mulaisekarang.app.viewmodel.CourseEditorViewModel
 import com.mulaisekarang.app.viewmodel.ForgotPasswordViewModel
 import com.mulaisekarang.app.viewmodel.InstructorCoursesViewModel
@@ -118,6 +122,9 @@ private object Routes {
     const val CHECKOUT_SUMMARY = "course/{courseId}/checkout"
     const val PAYMENT_SUCCESS = "payment-success/{referenceId}"
 
+    const val GROUP_INFO = "group-info/{conversationId}"
+    const val JOIN_GROUP = "join-group/{token}"
+
     // Instructor portal
     const val INSTRUCTOR_DASHBOARD = "instructor-portal"
     const val INSTRUCTOR_COURSES = "instructor-portal/courses"
@@ -127,6 +134,8 @@ private object Routes {
     const val INSTRUCTOR_GRADING = "instructor-portal/grading"
 
     fun chatConversation(id: Int) = "chat/$id"
+    fun groupInfo(id: Int) = "group-info/$id"
+    fun joinGroup(token: String) = "join-group/${android.net.Uri.encode(token)}"
     fun courseDetail(id: Int) = "course/$id"
     fun resetPassword(email: String) = "reset-password/${android.net.Uri.encode(email)}"
     fun instructorProfile(username: String) = "instructor/${android.net.Uri.encode(username)}"
@@ -168,6 +177,11 @@ fun MulaiSekarangNavGraph(
             val referenceId = uri.getQueryParameter("ref")
             if (referenceId != null) {
                 navController.navigate(Routes.paymentSuccess(referenceId))
+            }
+        } else if (uri.host == "mulaisekarang.com" && uri.path?.startsWith("/chat/join/") == true) {
+            val token = uri.lastPathSegment
+            if (token != null) {
+                navController.navigate(Routes.joinGroup(token))
             }
         }
         onDeepLinkConsumed()
@@ -328,6 +342,36 @@ fun MulaiSekarangNavGraph(
                     viewModel = chatConversationViewModel,
                     onBack = { navController.popBackStack() },
                     onChatPaywall = { navController.navigate(Routes.CHAT_PAYWALL) },
+                    onGroupInfoClick = { conversationId -> navController.navigate(Routes.groupInfo(conversationId)) }
+                )
+            }
+
+            composable(
+                Routes.GROUP_INFO,
+                arguments = listOf(navArgument("conversationId") { type = NavType.IntType }),
+            ) {
+                val groupInfoViewModel: GroupInfoViewModel = hiltViewModel()
+                GroupInfoScreen(
+                    viewModel = groupInfoViewModel,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            
+            composable(
+                Routes.JOIN_GROUP,
+                arguments = listOf(navArgument("token") { type = NavType.StringType }),
+            ) {
+                val joinGroupViewModel: JoinGroupViewModel = hiltViewModel()
+                JoinGroupScreen(
+                    viewModel = joinGroupViewModel,
+                    onSuccess = { conversationId ->
+                        navController.navigate(Routes.chatConversation(conversationId)) {
+                            popUpTo(Routes.JOIN_GROUP) { inclusive = true }
+                        }
+                    },
+                    onError = {
+                        navController.popBackStack()
+                    }
                 )
             }
 

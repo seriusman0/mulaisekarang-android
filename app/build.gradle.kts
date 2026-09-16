@@ -176,6 +176,8 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
 
+    implementation("com.pusher:pusher-java-client:2.4.4")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     if (hasGoogleServices) {

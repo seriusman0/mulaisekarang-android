@@ -35,4 +35,16 @@ class ChatRepository @Inject constructor(private val api: ApiService) {
         fields: Map<String, okhttp3.RequestBody>,
         file: okhttp3.MultipartBody.Part
     ): ChatMessage = api.sendAttachment(conversationId, fields, file).data
+    
+    suspend fun addParticipant(conversationId: Int, username: String): Conversation =
+        api.addParticipant(conversationId, com.mulaisekarang.app.data.model.AddParticipantRequest(username)).data
+        
+    suspend fun removeParticipant(conversationId: Int, userId: Int) {
+        api.removeParticipant(conversationId, userId)
+    }
+    
+    suspend fun generateInviteLink(conversationId: Int) = api.generateInviteLink(conversationId)
+    
+    suspend fun joinGroup(token: String): Conversation =
+        api.joinGroup(com.mulaisekarang.app.data.model.JoinGroupRequest(token)).data
 }
