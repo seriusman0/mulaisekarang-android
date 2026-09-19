@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Surface
 import com.mulaisekarang.app.data.model.Category
 import com.mulaisekarang.app.ui.components.CourseCard
 import com.mulaisekarang.app.ui.components.IdrCurrencyFormat
@@ -83,6 +91,53 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier.fillMaxSize(),
                 ) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(
+                                ComposeBrush.linearGradient(
+                                    listOf(androidx.compose.ui.graphics.Color(0xFF113156), androidx.compose.ui.graphics.Color(0xFF0078FF))
+                                )
+                            )
+                            .padding(24.dp)
+                    ) {
+                        Column {
+                            Text(
+                                "MULAI SEKARANG",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.6f),
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                            Text(
+                                "Tingkatkan Skill-mu\nSekarang!",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = androidx.compose.ui.graphics.Color.White,
+                                lineHeight = 34.sp
+                            )
+                            Text(
+                                "Platform kursus online berbahasa Indonesia untuk percepat karier. Belajar praktis, proyek nyata, sertifikat resmi.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.padding(top = 12.dp, bottom = 20.dp)
+                            )
+                            androidx.compose.material3.Button(
+                                onClick = onBrowseMarketplace,
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = androidx.compose.ui.graphics.Color.White,
+                                    contentColor = androidx.compose.ui.graphics.Color(0xFF113156)
+                                )
+                            ) {
+                                Text("Lihat Kelas", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
                 item {
                     Box(
                         modifier = Modifier
@@ -192,22 +247,15 @@ fun HomeScreen(
                 }
 
                 items(uiState.featuredCourses.take(3), key = { it.id }) { course ->
-                    CourseCard(
+                    FeaturedCourseCard(
                         title = course.title,
                         coverImageUrl = course.coverImageUrl,
                         mentorName = course.mentor?.displayName,
                         categoryLabel = course.category?.name,
                         rating = course.reviewsAvgRating,
                         onClick = { onCourseClick(course.id) },
-                    ) {
-                        Text(
-                            if (course.currentPrice <= 0.0) "Gratis" else IdrCurrencyFormat.format(course.currentPrice),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
+                        price = course.currentPrice
+                    )
                 }
                 }
             }
@@ -246,4 +294,80 @@ private fun iconForCategory(category: Category): ImageVector = when {
     category.slug.contains("bisnis", ignoreCase = true) || category.slug.contains("business", ignoreCase = true) -> Icons.Filled.Storefront
     category.slug.contains("marketing", ignoreCase = true) || category.slug.contains("pemasaran", ignoreCase = true) -> Icons.Filled.Campaign
     else -> Icons.Filled.Brush
+}
+
+@Composable
+fun FeaturedCourseCard(
+    title: String,
+    coverImageUrl: String?,
+    mentorName: String?,
+    categoryLabel: String?,
+    rating: Double?,
+    price: Double,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverImageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f/9f)
+            )
+            Column(modifier = Modifier.padding(20.dp)) {
+                if (categoryLabel != null) {
+                    Text(
+                        categoryLabel.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2
+                )
+                if (mentorName != null) {
+                    Text(
+                        "oleh $mentorName",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (price <= 0.0) "Gratis" else IdrCurrencyFormat.format(price),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    androidx.compose.material3.Button(
+                        onClick = onClick,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Daftar", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
 }
