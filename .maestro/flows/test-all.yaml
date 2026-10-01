@@ -1,4 +1,4 @@
-appId: com.mulaisekarang.app
+﻿appId: com.mulaisekarang.app
 ---
 - launchApp:
     clearState: true
@@ -15,19 +15,24 @@ appId: com.mulaisekarang.app
     visible: "Beranda"
     timeout: 10000
 
-# Lakukan navigasi dan fitur dasar
+# Navigasi ke semua tab
+- tapOn: "KURSUS SAYA"
+- swipe:
+    direction: DOWN
+- tapOn: "CHAT"
+- swipe:
+    direction: DOWN
+- tapOn: "BERANDA"
 - tapOn: "BELANJA"
-- extendedWaitUntil:
-    visible: "Cari kursus atau keahlian baru..."
-    timeout: 5000
-
+- swipe:
+    direction: DOWN
+- back
 - tapOn: "AKUN"
 - scrollUntilVisible:
     element:
       text: ".*Keluar.*"
     direction: DOWN
 - tapOn: ".*Keluar.*"
-
 - extendedWaitUntil:
     visible: "Selamat Datang"
     timeout: 5000

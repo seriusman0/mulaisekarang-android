@@ -226,14 +226,14 @@ fun ChatConversationScreen(
                     if (uploadProgress != null) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(start = 8.dp, end = 8.dp)) {
                             CircularProgressIndicator(
-                                progress = { uploadProgress!! / 100f },
+                                progress = { (uploadProgress ?: 0) / 100f },
                                 modifier = Modifier.size(36.dp),
                                 strokeWidth = 2.dp,
                                 color = Color(0xFF3498DB),
                                 trackColor = Color(0xFFEAEAEA)
                             )
                             Text(
-                                text = "${uploadProgress}%",
+                                text = "${uploadProgress ?: 0}%",
                                 style = androidx.compose.ui.text.TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                                 color = Color(0xFF3498DB)
                             )
