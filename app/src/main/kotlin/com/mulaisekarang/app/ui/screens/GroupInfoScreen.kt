@@ -229,8 +229,8 @@ fun GroupInfoScreen(
 
                     items(conversation.participants ?: emptyList()) { participant ->
                         ListItem(
-                            headlineContent = { Text(participant.user?.displayName ?: "User ${participant.userId}") },
-                            supportingContent = { Text(participant.role.replaceFirstChar { it.uppercase() }) },
+                            headlineContent = { Text(participant.user?.displayName ?: "User ${participant.userId ?: ""}") },
+                            supportingContent = { Text(participant.role?.replaceFirstChar { it.uppercase() } ?: "Anggota") },
                             leadingContent = {
                                 AsyncImage(
                                     model = participant.user?.profilePhotoUrl,
@@ -243,7 +243,7 @@ fun GroupInfoScreen(
                                 )
                             },
                             trailingContent = {
-                                if (isOwner && participant.userId != currentUserId) {
+                                if (isOwner && participant.userId != null && participant.userId != currentUserId) {
                                     IconButton(onClick = { viewModel.removeMember(participant.userId) }) {
                                         Icon(Icons.Filled.PersonRemove, contentDescription = "Keluarkan", tint = MaterialTheme.colorScheme.error)
                                     }

@@ -26,8 +26,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -93,16 +95,12 @@ private fun NavBarItem(tab: BottomNavTab, selected: Boolean, onClick: () -> Unit
         label = "navItemBackground",
     )
 
-    // Surface (rather than a bare clip + selectable) is what guarantees the
-    // press/hover ripple is bounded to `shape` instead of falling back to a
-    // hard-edged rectangle.
-    Surface(
-        selected = selected,
-        onClick = onClick,
-        shape = NavItemShape,
-        color = backgroundColor,
-        contentColor = tint,
-        modifier = Modifier.testTag("nav_tab_${tab.name.lowercase()}"),
+    Box(
+        modifier = Modifier
+            .testTag("nav_tab_${tab.name.lowercase()}")
+            .clip(NavItemShape)
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),

@@ -419,8 +419,8 @@ data class TransactionsResponse(
 
 @Serializable
 data class Participant(
-    @SerialName("user_id") val userId: Int,
-    val role: String,
+    @SerialName("user_id") val userId: Int? = null,
+    val role: String? = null,
     val user: Mentor? = null
 )
 

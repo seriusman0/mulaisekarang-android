@@ -40,7 +40,6 @@ fun BoxScope.GlassBackground(shape: Shape, modifier: Modifier = Modifier) {
             .matchParentSize()
             .shadow(elevation = 4.dp, shape = shape, clip = false)
             .clip(shape)
-            .then(if (blurSupported) Modifier.blur(20.dp) else Modifier)
             .background(glassColor.copy(alpha = GlassSurfaceAlpha))
             .border(1.dp, Color.White.copy(alpha = GlassBorderAlpha), shape),
     )
