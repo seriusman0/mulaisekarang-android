@@ -1,5 +1,6 @@
 package com.mulaisekarang.app.ui.components
 
+import com.mulaisekarang.app.util.GlobalVideoManager
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -26,13 +27,14 @@ import kotlinx.coroutines.delay
 
 private const val PositionSaveIntervalMs = 5_000L
 
+
 @OptIn(markerClass = [UnstableApi::class])
 @Composable
 fun VideoPlayer(
     streamUrl: String,
     authToken: String?,
     videoCache: Cache,
-    lessonId: Int = 0, // Added for decryption
+    lessonId: Int = 0,
     modifier: Modifier = Modifier,
     startPositionMs: Long = 0L,
     onPositionChanged: (Long) -> Unit = {},
@@ -43,45 +45,49 @@ fun VideoPlayer(
     val onPlaybackErrorState = rememberUpdatedState(onPlaybackError)
 
     val exoPlayer = remember(streamUrl, authToken) {
-        val httpDataSourceFactory = DefaultHttpDataSource.Factory().apply {
-            if (authToken != null) {
-                setDefaultRequestProperties(mapOf("Authorization" to "Bearer $authToken"))
+        if (GlobalVideoManager.streamUrl.value == streamUrl && GlobalVideoManager.exoPlayer != null) {
+            GlobalVideoManager.isPlayingLesson.value = true
+            GlobalVideoManager.isMiniPlayerVisible.value = false
+            GlobalVideoManager.exoPlayer!!
+        } else {
+            GlobalVideoManager.close() // Close any existing player for a different video
+            val httpDataSourceFactory = DefaultHttpDataSource.Factory().apply {
+                if (authToken != null) {
+                    setDefaultRequestProperties(mapOf("Authorization" to "Bearer $authToken"))
+                }
             }
-        }
-        
-        // Custom DataSource factory that decrypts local files
-        val customDataSourceFactory = androidx.media3.datasource.DataSource.Factory {
-            if (streamUrl.startsWith("file://")) {
-                com.mulaisekarang.app.util.EncryptedFileDataSource(lessonId)
-            } else {
-                androidx.media3.datasource.DefaultDataSource.Factory(context, httpDataSourceFactory).createDataSource()
+            
+            val customDataSourceFactory = androidx.media3.datasource.DataSource.Factory {
+                if (streamUrl.startsWith("file://")) {
+                    com.mulaisekarang.app.util.EncryptedFileDataSource(lessonId)
+                } else {
+                    androidx.media3.datasource.DefaultDataSource.Factory(context, httpDataSourceFactory).createDataSource()
+                }
             }
-        }
 
-        // Cache-backed data source
-        val cacheDataSourceFactory = CacheDataSource.Factory()
-            .setCache(videoCache)
-            .setUpstreamDataSourceFactory(customDataSourceFactory)
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+            val cacheDataSourceFactory = CacheDataSource.Factory()
+                .setCache(videoCache)
+                .setUpstreamDataSourceFactory(customDataSourceFactory)
+                .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
-        ExoPlayer.Builder(context)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(context).setDataSourceFactory(cacheDataSourceFactory))
-            .build()
-            .apply {
-                addListener(object : Player.Listener {
-                    override fun onPlayerError(error: PlaybackException) {
-                        onPlaybackErrorState.value(error)
-                    }
-                })
-                setMediaItem(MediaItem.fromUri(streamUrl))
-                if (startPositionMs > 0L) seekTo(startPositionMs)
-                prepare()
-            }
+            val newPlayer = ExoPlayer.Builder(context.applicationContext)
+                .setMediaSourceFactory(DefaultMediaSourceFactory(context.applicationContext).setDataSourceFactory(cacheDataSourceFactory))
+                .build()
+                .apply {
+                    addListener(object : Player.Listener {
+                        override fun onPlayerError(error: PlaybackException) {
+                            onPlaybackErrorState.value(error)
+                        }
+                    })
+                    setMediaItem(MediaItem.fromUri(streamUrl))
+                    if (startPositionMs > 0L) seekTo(startPositionMs)
+                    prepare()
+                }
+            GlobalVideoManager.registerPlayer(newPlayer, streamUrl)
+            newPlayer
+        }
     }
 
-    // Periodically persist playback position while the player exists, so a
-    // student who backgrounds the app mid-lesson resumes near where they
-    // left off rather than losing progress entirely.
     LaunchedEffect(exoPlayer) {
         while (true) {
             delay(PositionSaveIntervalMs)
@@ -90,9 +96,12 @@ fun VideoPlayer(
     }
 
     DisposableEffect(exoPlayer) {
+        GlobalVideoManager.isPlayingLesson.value = true
         onDispose {
             onPositionChangedState.value(exoPlayer.currentPosition)
-            exoPlayer.release()
+            if (GlobalVideoManager.exoPlayer == exoPlayer) {
+                GlobalVideoManager.enterMiniPlayer()
+            }
         }
     }
 

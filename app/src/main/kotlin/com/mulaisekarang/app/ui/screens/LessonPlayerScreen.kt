@@ -74,21 +74,7 @@ fun LessonPlayerScreen(
                     }
                 },
                 actions = {
-                    if (uiState is LessonPlayerUiState.Loaded) {
-                        val state = uiState as LessonPlayerUiState.Loaded
-                        if (state.isDownloaded) {
-                            Icon(
-                                imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = "Tersedia Offline",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        } else {
-                            Button(onClick = { viewModel.downloadLesson() }, modifier = Modifier.padding(end = 8.dp)) {
-                                Text("Unduh")
-                            }
-                        }
-                    }
+                    // Manual download button removed as caching is now handled automatically in the background
                 }
             )
         },

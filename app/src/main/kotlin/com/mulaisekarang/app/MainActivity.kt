@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
@@ -98,11 +99,19 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     } else {
-                        MulaiSekarangNavGraph(
-                            sessionEventBus = sessionEventBus,
-                            deepLink = pendingDeepLink,
-                            onDeepLinkConsumed = { pendingDeepLink = null },
-                        )
+                        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+                            MulaiSekarangNavGraph(
+                                sessionEventBus = sessionEventBus,
+                                deepLink = pendingDeepLink,
+                                onDeepLinkConsumed = { pendingDeepLink = null },
+                            )
+                            
+                            com.mulaisekarang.app.ui.components.FloatingMiniPlayer(
+                                modifier = Modifier
+                                    .align(androidx.compose.ui.Alignment.BottomEnd)
+                                    .padding(bottom = 80.dp) // Offset for bottom nav bar if present
+                            )
+                        }
                     }
 
                     if (showUpdateDialog && updateInfo != null) {
