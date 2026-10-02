@@ -10,6 +10,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -28,6 +29,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
+        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context,
         authInterceptor: AuthInterceptor,
         sessionExpiredInterceptor: SessionExpiredInterceptor,
     ): OkHttpClient {
@@ -35,14 +37,79 @@ object NetworkModule {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
 
-        return OkHttpClient.Builder()
+        val cacheSize = (50 * 1024 * 1024).toLong()
+        val cache = okhttp3.Cache(context.cacheDir, cacheSize)
+
+        lateinit var okHttpClient: OkHttpClient
+
+        val offlineFirstInterceptor = okhttp3.Interceptor { chain ->
+            val request = chain.request()
+            if (request.method != "GET") {
+                return@Interceptor chain.proceed(request)
+            }
+
+            val isForceNetwork = request.cacheControl.noCache || request.header("Cache-Control")?.contains("no-cache") == true
+            if (isForceNetwork) {
+                return@Interceptor chain.proceed(request)
+            }
+
+            val cacheRequest = request.newBuilder()
+                .cacheControl(okhttp3.CacheControl.FORCE_CACHE)
+                .build()
+
+            var cacheResponse: okhttp3.Response? = null
+            try {
+                cacheResponse = chain.proceed(cacheRequest)
+            } catch (e: Exception) {
+                // Ignore cache miss exception
+            }
+
+            if (cacheResponse != null && cacheResponse.isSuccessful) {
+                // Cache hit! Return immediately for zero buffering.
+                // Fetch fresh data in background so the next time it's opened it has the latest data
+                @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    try {
+                        val freshRequest = request.newBuilder()
+                            .cacheControl(okhttp3.CacheControl.FORCE_NETWORK)
+                            .build()
+                        okHttpClient.newCall(freshRequest).execute().close()
+                    } catch (e: Exception) {
+                        // Background fetch failed, ignore
+                    }
+                }
+                return@Interceptor cacheResponse
+            }
+
+            chain.proceed(request)
+        }
+
+        val rewriteResponseInterceptor = okhttp3.Interceptor { chain ->
+            val response = chain.proceed(chain.request())
+            if (chain.request().method == "GET") {
+                response.newBuilder()
+                    .removeHeader("Pragma")
+                    .removeHeader("Cache-Control")
+                    .header("Cache-Control", "public, max-age=${7 * 24 * 60 * 60}")
+                    .build()
+            } else {
+                response
+            }
+        }
+
+        okHttpClient = OkHttpClient.Builder()
+            .cache(cache)
+            .addInterceptor(offlineFirstInterceptor)
             .addInterceptor(authInterceptor)
             .addInterceptor(sessionExpiredInterceptor)
             .addInterceptor { chain ->
                 chain.proceed(chain.request().newBuilder().addHeader("X-Client", "android").build())
             }
             .addInterceptor(logging)
+            .addNetworkInterceptor(rewriteResponseInterceptor)
             .build()
+
+        return okHttpClient
     }
 
     @Provides
