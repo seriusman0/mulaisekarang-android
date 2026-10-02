@@ -44,44 +44,31 @@ object NetworkModule {
 
         val offlineFirstInterceptor = okhttp3.Interceptor { chain ->
             val request = chain.request()
-            if (request.method != "GET") {
-                return@Interceptor chain.proceed(request)
-            }
+            
+            // Proceed normally. If it's a GET request with valid cache, OkHttp will return it instantly 
+            // because our rewriteResponseInterceptor sets a 7-day max-age.
+            val response = chain.proceed(request)
 
-            val isForceNetwork = request.cacheControl.noCache || request.header("Cache-Control")?.contains("no-cache") == true
-            if (isForceNetwork) {
-                return@Interceptor chain.proceed(request)
-            }
-
-            val cacheRequest = request.newBuilder()
-                .cacheControl(okhttp3.CacheControl.FORCE_CACHE)
-                .build()
-
-            var cacheResponse: okhttp3.Response? = null
-            try {
-                cacheResponse = chain.proceed(cacheRequest)
-            } catch (e: Exception) {
-                // Ignore cache miss exception
-            }
-
-            if (cacheResponse != null && cacheResponse.isSuccessful) {
-                // Cache hit! Return immediately for zero buffering.
-                // Fetch fresh data in background so the next time it's opened it has the latest data
-                @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
-                kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    try {
-                        val freshRequest = request.newBuilder()
-                            .cacheControl(okhttp3.CacheControl.FORCE_NETWORK)
-                            .build()
-                        okHttpClient.newCall(freshRequest).execute().close()
-                    } catch (e: Exception) {
-                        // Background fetch failed, ignore
+            if (request.method == "GET" && response.networkResponse == null) {
+                // If networkResponse is null, it means the response was served entirely from cache.
+                val isForceNetwork = request.cacheControl.noCache || request.header("Cache-Control")?.contains("no-cache") == true
+                if (!isForceNetwork) {
+                    // Trigger a background network fetch to update the cache for the next load
+                    @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+                    kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        try {
+                            val freshRequest = request.newBuilder()
+                                .cacheControl(okhttp3.CacheControl.FORCE_NETWORK)
+                                .build()
+                            okHttpClient.newCall(freshRequest).execute().close()
+                        } catch (e: Exception) {
+                            // Ignore background fetch errors
+                        }
                     }
                 }
-                return@Interceptor cacheResponse
             }
 
-            chain.proceed(request)
+            response
         }
 
         val rewriteResponseInterceptor = okhttp3.Interceptor { chain ->
