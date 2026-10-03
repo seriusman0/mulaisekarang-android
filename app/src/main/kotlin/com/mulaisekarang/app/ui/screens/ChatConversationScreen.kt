@@ -159,17 +159,18 @@ fun ChatConversationScreen(
                 is ChatConversationUiState.Loaded -> {
                     val listState = rememberLazyListState()
                     LaunchedEffect(state.messages.size) {
-                        if (state.messages.isNotEmpty()) listState.animateScrollToItem(state.messages.size - 1)
+                        if (state.messages.isNotEmpty()) listState.animateScrollToItem(0)
                     }
                     LazyColumn(
                         state = listState,
+                        reverseLayout = true,
                         contentPadding = PaddingValues(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
                     ) {
-                        items(state.messages, key = { it.id }) { message ->
+                        items(state.messages.reversed(), key = { it.id }) { message ->
                             MessageBubble(
                                 message,
                                 isAiTutor = conversation?.type == "ai" && !message.isMine,
