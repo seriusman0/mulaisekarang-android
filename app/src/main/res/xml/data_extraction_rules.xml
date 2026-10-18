@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Cloud-backup and device-transfer exclusions for Android 12+
+    (android:dataExtractionRules).  Mirrors backup_rules.xml logic.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- DataStore prefs (includes auth token) -->
+        <exclude domain="file" path="datastore/" />
+        <!-- Room databases -->
+        <exclude domain="database" path="mulaisekarang_db" />
+        <exclude domain="database" path="mulaisekarang_db-shm" />
+        <exclude domain="database" path="mulaisekarang_db-wal" />
+        <!-- OkHttp cache — easily rebuilt, no need to back up -->
+        <exclude domain="cache" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Same exclusions for device-to-device transfers -->
+        <exclude domain="file" path="datastore/" />
+        <exclude domain="database" path="mulaisekarang_db" />
+        <exclude domain="database" path="mulaisekarang_db-shm" />
+        <exclude domain="database" path="mulaisekarang_db-wal" />
+    </device-transfer>
+</data-extraction-rules>

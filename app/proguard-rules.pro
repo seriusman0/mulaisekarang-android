@@ -21,3 +21,46 @@
 -keepclasseswithmembers class com.mulaisekarang.app.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# ---------------------------------------------------------------------------
+# Hilt / Dagger — keep generated component and module classes.
+# R8 can strip or rename them if not explicitly kept, causing DI injection
+# failures at runtime despite a clean build.
+# ---------------------------------------------------------------------------
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class * { *; }
+-keep @dagger.hilt.android.AndroidEntryPoint class * { *; }
+-keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
+-keepclasseswithmembernames class * {
+    @javax.inject.Inject <fields>;
+}
+-keepclasseswithmembernames class * {
+    @javax.inject.Inject <init>(...);
+}
+
+# ---------------------------------------------------------------------------
+# Pusher Java Client — uses reflection internally
+# ---------------------------------------------------------------------------
+-keep class com.pusher.** { *; }
+-dontwarn com.pusher.**
+
+# ---------------------------------------------------------------------------
+# OkHttp / Okio — suppress known harmless warnings
+# ---------------------------------------------------------------------------
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+
+# ---------------------------------------------------------------------------
+# Coil — image loader
+# ---------------------------------------------------------------------------
+-dontwarn coil.**
+
+# ---------------------------------------------------------------------------
+# Keep source file names and line numbers in stack traces (Crashlytics reads
+# these via the mapping file uploaded to Play / Firebase automatically by the
+# Crashlytics Gradle plugin).
+# ---------------------------------------------------------------------------
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

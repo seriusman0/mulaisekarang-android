@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Full-backup rules (Android 11 and below, android:fullBackupContent).
+    Auth tokens stored via DataStore are excluded so a restored device
+    does not replay a stale/revoked session.  Course-cache Room databases
+    are excluded too — they are rebuilt on first launch from the network.
+-->
+<full-backup-content>
+    <!-- DataStore prefs (includes auth token) -->
+    <exclude domain="file" path="datastore/" />
+    <!-- Room databases -->
+    <exclude domain="database" path="mulaisekarang_db" />
+    <exclude domain="database" path="mulaisekarang_db-shm" />
+    <exclude domain="database" path="mulaisekarang_db-wal" />
+    <!-- OkHttp HTTP cache — large and easily rebuilt -->
+    <exclude domain="cache" path="." />
+</full-backup-content>

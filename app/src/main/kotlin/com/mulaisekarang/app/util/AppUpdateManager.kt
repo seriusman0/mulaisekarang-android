@@ -3,122 +3,70 @@ package com.mulaisekarang.app.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.core.content.FileProvider
 import com.mulaisekarang.app.BuildConfig
 import com.mulaisekarang.app.data.model.AppVersionResponse
 import com.mulaisekarang.app.data.network.ApiService
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.File
-import java.io.FileOutputStream
-import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Checks if a newer version of the app is available via the backend API.
+ *
+ * For Play Store-distributed builds this class is intentionally limited to
+ * version-check only: sideloading APKs from an external URL is prohibited by
+ * Google Play policy (Device and Network Abuse policy).  The download-and-install
+ * path has been removed entirely so the class can safely remain compiled into
+ * release builds without triggering policy violations.
+ *
+ * If you need in-app updates for Play builds, use the official
+ * Google Play In-App Updates API
+ * (https://developer.android.com/guide/playcore/in-app-updates).
+ *
+ * For direct/sideload distribution the backend can expose a download URL and
+ * the host app can open a browser to let the user manually download the update —
+ * that flow does not require REQUEST_INSTALL_PACKAGES and does not violate any policy.
+ */
 @Singleton
 class AppUpdateManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val apiService: ApiService,
-    private val okHttpClient: OkHttpClient
 ) {
+    /**
+     * Returns version info from the backend, or null on error.
+     * Callers should check [AppVersionResponse.updateAvailable] and
+     * [AppVersionResponse.updateRequired].
+     */
     suspend fun checkUpdate(): AppVersionResponse? {
         return try {
             apiService.getAppVersion("stable", BuildConfig.VERSION_CODE)
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }
 
-    suspend fun downloadAndInstall(
-        updateInfo: AppVersionResponse,
-        onProgress: (Float) -> Unit
-    ): Boolean = withContext(Dispatchers.IO) {
-        val url = updateInfo.downloadUrl ?: return@withContext false
-        val expectedChecksum = updateInfo.checksumSha256
-        val expectedSize = updateInfo.fileSize
-
-        val request = Request.Builder().url(url).build()
-        val response = try {
-            okHttpClient.newCall(request).execute()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return@withContext false
-        }
-
-        if (!response.isSuccessful) return@withContext false
-        val body = response.body ?: return@withContext false
-
-        val apkFile = File(context.cacheDir, "update.apk")
-        if (apkFile.exists()) {
-            apkFile.delete()
-        }
-
+    /**
+     * Opens the Play Store listing so the user can update through official channels.
+     * Use this instead of a direct APK download for Play-distributed builds.
+     */
+    fun openPlayStoreListing() {
+        val packageName = context.packageName
         try {
-            val totalBytes = body.contentLength()
-            var bytesCopied = 0L
-            val buffer = ByteArray(8 * 1024)
-            var bytes = body.source().read(buffer)
-            val output = FileOutputStream(apkFile)
-
-            output.use { out ->
-                while (bytes >= 0) {
-                    out.write(buffer, 0, bytes)
-                    bytesCopied += bytes
-                    if (totalBytes > 0) {
-                        onProgress(bytesCopied.toFloat() / totalBytes.toFloat())
-                    }
-                    bytes = body.source().read(buffer)
+            context.startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            apkFile.delete()
-            return@withContext false
+            )
+        } catch (_: Exception) {
+            // Fallback to browser if Play Store app is not installed
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+                ).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            )
         }
-
-        // Verify size
-        if (expectedSize != null && apkFile.length() != expectedSize) {
-            apkFile.delete()
-            return@withContext false
-        }
-
-        // Verify checksum
-        if (expectedChecksum != null) {
-            val checksum = computeSha256(apkFile)
-            if (checksum != expectedChecksum) {
-                apkFile.delete()
-                return@withContext false
-            }
-        }
-
-        installApk(apkFile)
-        return@withContext true
-    }
-
-    private fun computeSha256(file: File): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        file.inputStream().use { fis ->
-            val buffer = ByteArray(8 * 1024)
-            var bytesRead = fis.read(buffer)
-            while (bytesRead != -1) {
-                digest.update(buffer, 0, bytesRead)
-                bytesRead = fis.read(buffer)
-            }
-        }
-        val hashBytes = digest.digest()
-        return hashBytes.joinToString("") { "%02x".format(it) }
-    }
-
-    private fun installApk(file: File) {
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(uri, "application/vnd.android.package-archive")
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-        }
-        context.startActivity(intent)
     }
 }

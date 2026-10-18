@@ -30,15 +30,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.mulaisekarang.app.util.AppUpdateManager
 import com.mulaisekarang.app.data.model.AppVersionResponse
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -59,17 +53,23 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var updateInfo by remember { mutableStateOf<AppVersionResponse?>(null) }
-            var isDownloading by remember { mutableStateOf(false) }
-            var downloadProgress by remember { mutableStateOf(0f) }
             var showUpdateDialog by remember { mutableStateOf(false) }
-            val scope = rememberCoroutineScope()
 
             var isMaintenanceMode by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
-                // Play Store owns updates for Play-installed builds; the in-app APK
-                // self-updater is only relevant for direct/sideload distribution.
-                val installedFromPlayStore = packageManager.getInstallerPackageName(packageName) == "com.android.vending"
+                // Play Store owns updates for Play-installed builds.
+                // Sideloading APKs from an external URL is prohibited by Google Play policy,
+                // so we only redirect to the Play Store listing — never download+install directly.
+                val installedFromPlayStore = try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                        packageManager.getInstallSourceInfo(packageName).installingPackageName == "com.android.vending"
+                    } else {
+                        @Suppress("DEPRECATION")
+                        packageManager.getInstallerPackageName(packageName) == "com.android.vending"
+                    }
+                } catch (_: Exception) { false }
+
                 if (!installedFromPlayStore) {
                     val info = appUpdateManager.checkUpdate()
                     if (info?.updateAvailable == true) {
@@ -118,50 +118,30 @@ class MainActivity : ComponentActivity() {
                         val required = updateInfo?.updateRequired == true
                         AlertDialog(
                             onDismissRequest = {
-                                if (!required && !isDownloading) {
-                                    showUpdateDialog = false
-                                }
+                                if (!required) showUpdateDialog = false
                             },
-                            title = { Text("Update Available") },
+                            title = { Text("Update Tersedia") },
                             text = {
-                                if (isDownloading) {
-                                    Column {
-                                        Text("Downloading update...")
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        LinearProgressIndicator(progress = { downloadProgress })
-                                    }
-                                } else {
-                                    Text(updateInfo?.releaseNotes ?: "A new version of the app is available.")
-                                }
+                                Text(updateInfo?.releaseNotes ?: "Versi terbaru tersedia. Silakan perbarui melalui Google Play Store.")
                             },
                             confirmButton = {
-                                if (!isDownloading) {
-                                    TextButton(onClick = {
-                                        isDownloading = true
-                                        scope.launch {
-                                            val success = appUpdateManager.downloadAndInstall(updateInfo!!) { progress ->
-                                                downloadProgress = progress
-                                            }
-                                            isDownloading = false
-                                            if (!success && !required) {
-                                                showUpdateDialog = false
-                                            }
-                                        }
-                                    }) {
-                                        Text("Update")
-                                    }
+                                TextButton(onClick = {
+                                    appUpdateManager.openPlayStoreListing()
+                                    if (!required) showUpdateDialog = false
+                                }) {
+                                    Text("Perbarui")
                                 }
                             },
                             dismissButton = {
-                                if (!required && !isDownloading) {
+                                if (!required) {
                                     TextButton(onClick = { showUpdateDialog = false }) {
-                                        Text("Later")
+                                        Text("Nanti")
                                     }
                                 }
                             },
                             properties = DialogProperties(
-                                dismissOnBackPress = !required && !isDownloading,
-                                dismissOnClickOutside = !required && !isDownloading
+                                dismissOnBackPress = !required,
+                                dismissOnClickOutside = !required
                             )
                         )
                     }
