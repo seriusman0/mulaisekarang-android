@@ -40,10 +40,11 @@
 }
 
 # ---------------------------------------------------------------------------
-# Pusher Java Client — uses reflection internally
+# Pusher Java Client — uses reflection internally, depends on SLF4J
 # ---------------------------------------------------------------------------
 -keep class com.pusher.** { *; }
 -dontwarn com.pusher.**
+-dontwarn org.slf4j.**
 
 # ---------------------------------------------------------------------------
 # OkHttp / Okio — suppress known harmless warnings

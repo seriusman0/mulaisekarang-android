@@ -26,10 +26,10 @@ import javax.inject.Inject
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.mulaisekarang.app.util.AppUpdateManager
 import com.mulaisekarang.app.data.model.AppVersionResponse

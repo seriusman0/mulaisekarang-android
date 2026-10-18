@@ -41,5 +41,32 @@ Enable **Play App Signing** (Google manages the actual signing key; you upload w
 Upload that `.aab` to a **Closed/Internal testing** track first, not Production — verify the signed build actually works (see README's release section + this repo's own on-device verification) before promoting.
 
 ## 6. After the first release
-- Keep `/home/ykde/mulaisekarang-android-release-keys/mulaisekarang-release.jks` and `keystore.properties` backed up somewhere safe *outside* this machine (password manager + encrypted backup) — losing them blocks all future updates unless Play App Signing's key-upgrade process is used.
+- Keep `C:/Users/Krisman/Documents/mulaisekarang-publish/mulaisekarang-release.jks` and `keystore.properties` backed up somewhere safe *outside* this machine (password manager + encrypted backup) — losing them blocks all future updates unless Play App Signing's key-upgrade process is used.
 - `versionCode` must increase on every subsequent upload (`app/build.gradle.kts`); `versionName` is cosmetic.
+
+## Changes made for Play Store compliance (applied 2026-10)
+
+The following code changes were made to ensure the app passes Google Play review:
+
+### 1. Removed APK sideload/self-update feature (CRITICAL — Policy violation fix)
+`AppUpdateManager.downloadAndInstall()` was removed entirely. Downloading and installing APKs from an external URL is prohibited by Google Play's Device and Network Abuse policy. The class now only:
+- Checks for updates via `checkUpdate()` (version comparison only)
+- Redirects to the Play Store listing via `openPlayStoreListing()`
+
+`MainActivity.kt` update dialog was updated accordingly — now opens Play Store instead of downloading.
+
+### 2. Updated installer detection to use non-deprecated API (Android 11+)
+`getInstallerPackageName()` (deprecated since API 30) replaced with `getInstallSourceInfo().installingPackageName` with a fallback for older devices.
+
+### 3. Added explicit backup rules (Security improvement)
+- Added `android:fullBackupContent="@xml/backup_rules"` (Android ≤ 11)
+- Added `android:dataExtractionRules="@xml/data_extraction_rules"` (Android 12+)
+- Both exclude: auth tokens (DataStore), Room DB files, OkHttp cache
+- This prevents session tokens from being restored on a different/attacker-controlled device.
+
+### 4. Expanded ProGuard rules
+Added keep rules for:
+- Hilt/Dagger DI annotations (`@HiltViewModel`, `@AndroidEntryPoint`, `@Inject`)
+- Pusher Java Client (uses reflection)
+- OkHttp/Okio suppress warnings
+- `SourceFile`/`LineNumberTable` attributes for readable Crashlytics stack traces
