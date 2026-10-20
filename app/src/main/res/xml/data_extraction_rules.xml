@@ -11,8 +11,8 @@
         <exclude domain="database" path="mulaisekarang_db" />
         <exclude domain="database" path="mulaisekarang_db-shm" />
         <exclude domain="database" path="mulaisekarang_db-wal" />
-        <!-- OkHttp cache — easily rebuilt, no need to back up -->
-        <exclude domain="cache" path="." />
+        <!-- OkHttp cache lives in the app cache dir, which is never backed up or
+             transferred, so no rule is needed here ("cache" is not a valid domain). -->
     </cloud-backup>
     <device-transfer>
         <!-- Same exclusions for device-to-device transfers -->

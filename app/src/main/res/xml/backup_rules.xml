@@ -12,6 +12,7 @@
     <exclude domain="database" path="mulaisekarang_db" />
     <exclude domain="database" path="mulaisekarang_db-shm" />
     <exclude domain="database" path="mulaisekarang_db-wal" />
-    <!-- OkHttp HTTP cache — large and easily rebuilt -->
-    <exclude domain="cache" path="." />
+    <!-- OkHttp HTTP cache lives in the app cache dir, which the backup system never
+         backs up in the first place — no rule needed (and "cache" is not a valid
+         <exclude> domain). -->
 </full-backup-content>

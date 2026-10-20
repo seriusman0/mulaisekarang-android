@@ -39,8 +39,8 @@ android {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 15
-        versionName = "1.0.8"
+        versionCode = 16
+        versionName = "1.0.9"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
         // Google ID tokens requested on Android must use this as the audience so the backend can verify them.
