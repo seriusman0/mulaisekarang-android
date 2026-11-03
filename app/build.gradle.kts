@@ -39,8 +39,8 @@ android {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.0.9"
+        versionCode = 17
+        versionName = "1.0.10"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
         // Google ID tokens requested on Android must use this as the audience so the backend can verify them.
@@ -75,9 +75,9 @@ android {
         }
         release {
             buildConfigField("String", "BASE_URL", "\"https://mulaisekarang.com/api/v1/\"")
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles("proguard-rules.pro")
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
