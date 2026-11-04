@@ -34,13 +34,14 @@ val keystoreProperties = Properties().apply {
 android {
     namespace = "com.mulaisekarang.app"
     compileSdk = 36
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         applicationId = "com.mulaisekarang.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 17
-        versionName = "1.0.10"
+        versionCode = 100
+        versionName = "1.0.12"
 
         // Same Web OAuth client used by the Laravel backend (config/services.php `google.client_id`).
         // Google ID tokens requested on Android must use this as the audience so the backend can verify them.
@@ -75,8 +76,8 @@ android {
         }
         release {
             buildConfigField("String", "BASE_URL", "\"https://mulaisekarang.com/api/v1/\"")
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles("proguard-rules.pro")
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
